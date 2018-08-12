@@ -1,5 +1,6 @@
 package com.example.asus1.funcamera.RecordVideo;
 
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
 import com.example.asus1.funcamera.Utils.ShaderUtil;
@@ -18,9 +19,10 @@ public class Photo {
             "vTextureCoord = aTexCoord;" +
             "}";
 
-    private String mFragmentShader = "precision highp float;" +
+    private String mFragmentShader = "#extension GL_OES_EGL_image_external : require\n" +
+            "precision highp float;" +
             "varying vec2 vTextureCoord;" +
-            "uniform sampler2D uSampler;" +
+            "uniform samplerExternalOES uSampler;" +
             "void main(){" +
             "gl_FragColor = texture2D(uSampler,vTextureCoord);" +
             "}";
@@ -45,7 +47,7 @@ public class Photo {
     private void initVertexData(){
 
         float[] vertexs = new float[]{
-                -1,0,0,
+                -1,1,0,
                 -1,-1,0,
                 1,1,0,
                 1,-1,0
@@ -101,7 +103,7 @@ public class Photo {
         GLES20.glEnableVertexAttribArray(maTextureHandle);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textId);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,textId);
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES,mIndexCount,
                 GLES20.GL_UNSIGNED_BYTE,mIndexbuffer);

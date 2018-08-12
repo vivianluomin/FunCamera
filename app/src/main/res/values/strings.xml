@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FunCamera</string>
+
+    <string name="requestPermission">您拒绝了访问权限</string>
 </resources>
