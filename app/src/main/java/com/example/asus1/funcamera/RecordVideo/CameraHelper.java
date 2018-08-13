@@ -16,9 +16,12 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.content.PermissionChecker;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +46,16 @@ public class CameraHelper extends HandlerThread {
     public CameraHelper(Context context, SurfaceTexture surfaceTexture){
         super(TAG);
         mContext = context;
-        surfaceTexture.setDefaultBufferSize(1024,1080);
+        Display display = ((WindowManager)context
+                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        int screenWidth = metrics.widthPixels;
+        int screenHidth = metrics.heightPixels;
+
+
+        surfaceTexture.
+                setDefaultBufferSize(4*screenWidth/3,3 * screenWidth / 4);
         mSurface = new Surface(surfaceTexture);
         initCamera();
     }
