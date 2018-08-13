@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
 
-public class CameraHelper extends HandlerThread {
+public class CameraHelper  {
 
     private Context mContext;
     private CameraManager mCameraManager;
@@ -44,7 +44,7 @@ public class CameraHelper extends HandlerThread {
 
 
     public CameraHelper(Context context, SurfaceTexture surfaceTexture){
-        super(TAG);
+
         mContext = context;
         Display display = ((WindowManager)context
                 .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -95,7 +95,7 @@ public class CameraHelper extends HandlerThread {
     private CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice camera) {
-            Log.d(TAG, "onOpened: 111111111111111111");
+
             mCameraDevice = camera;
             Log.d(TAG, "onOpened: " + mCameraId);
             createPreview();
@@ -103,7 +103,7 @@ public class CameraHelper extends HandlerThread {
 
         @Override
         public void onDisconnected(@NonNull CameraDevice camera) {
-            Log.d(TAG, "onDisconnected: 2222222222222222222");
+
             mCameraDevice.close();
             mCameraDevice = null;
 
@@ -111,7 +111,7 @@ public class CameraHelper extends HandlerThread {
 
         @Override
         public void onError(@NonNull CameraDevice camera, int error) {
-            Log.d(TAG, "onError: 3333333333333333333333333");
+
             mCameraDevice.close();
             mCameraDevice = null;
 

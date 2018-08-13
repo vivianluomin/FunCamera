@@ -125,7 +125,6 @@ public class Photo {
         Matrix.setIdentityM(mMvpMatrix,0);
         Matrix.rotateM(mMvpMatrix,0,180,1,0,0);
 
-
         GLES20.glUniformMatrix4fv(muMvpMatrixHandle,
                 1,false,mMvpMatrix,0);
 
