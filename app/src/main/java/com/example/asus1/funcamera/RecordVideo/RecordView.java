@@ -17,6 +17,7 @@ public class RecordView extends GLSurfaceView {
 
     private RecordRender mRender;
     private  Context mContext;
+    private float[] mStMatrix = new float[16];
 
     private static final String TAG = "RecordView";
 
@@ -50,6 +51,7 @@ public class RecordView extends GLSurfaceView {
             mSurfaceTexture = new SurfaceTexture(mTextId);
             mSurfaceTexture.setOnFrameAvailableListener(this);
             mCamera = new CameraHelper(mContext,mSurfaceTexture);
+            mCamera.start();
 
         }
 
@@ -62,7 +64,8 @@ public class RecordView extends GLSurfaceView {
         public void onDrawFrame(GL10 gl) {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT|GLES20.GL_DEPTH_BUFFER_BIT);
             mSurfaceTexture.updateTexImage();
-            mPhoto.draw(mTextId);
+            mSurfaceTexture.getTransformMatrix(mStMatrix);
+            mPhoto.draw(mTextId,mStMatrix);
         }
 
         private void initTextureId(){
@@ -72,13 +75,13 @@ public class RecordView extends GLSurfaceView {
             mTextId = texutes[0];
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,mTextId);
 
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+            GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                     GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_NEAREST);//设置MIN 采样方式
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+            GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                     GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);//设置MAG采样方式
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+            GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                     GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);//设置S轴拉伸方式
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+            GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                     GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);//设置T轴拉伸方式
 
         }
@@ -87,7 +90,7 @@ public class RecordView extends GLSurfaceView {
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 
-            Log.d(TAG, "onFrameAvailable: ");
+
         }
         
     }

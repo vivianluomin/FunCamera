@@ -12,6 +12,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.opengl.EGLSurface;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.content.PermissionChecker;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
 
-public class CameraHelper {
+public class CameraHelper extends HandlerThread {
 
     private Context mContext;
     private CameraManager mCameraManager;
@@ -33,10 +34,16 @@ public class CameraHelper {
     private Surface mSurface;
     private CaptureRequest.Builder mPreviewBuilder;
 
+    private android.os.Handler mMainHandler;
+    private android.os.Handler mChildHanlder;
+
     private static final String TAG = "CameraHelper";
 
-    public CameraHelper(Context context,SurfaceTexture surfaceTexture){
+
+    public CameraHelper(Context context, SurfaceTexture surfaceTexture){
+        super(TAG);
         mContext = context;
+        surfaceTexture.setDefaultBufferSize(1024,1080);
         mSurface = new Surface(surfaceTexture);
         initCamera();
     }
@@ -59,9 +66,11 @@ public class CameraHelper {
                 }
             }
 
+            mMainHandler = new android.os.Handler(Looper.getMainLooper());
             if(mCameraId!=null){
-
-                mCameraManager.openCamera(mCameraId,mStateCallback,new android.os.Handler());
+                Log.d(TAG, "initCamera: "+mCameraId);
+                mCameraManager.openCamera(mCameraId,mStateCallback
+                        ,mMainHandler);
 
             }
 
@@ -74,22 +83,26 @@ public class CameraHelper {
     private CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice camera) {
-            if(camera!=null){
-                mCameraDevice = camera;
-                createPreview();
-            }
+            Log.d(TAG, "onOpened: 111111111111111111");
+            mCameraDevice = camera;
+            Log.d(TAG, "onOpened: " + mCameraId);
+            createPreview();
         }
 
         @Override
         public void onDisconnected(@NonNull CameraDevice camera) {
-                mCameraDevice.close();
-                mCameraDevice = null;
+            Log.d(TAG, "onDisconnected: 2222222222222222222");
+            mCameraDevice.close();
+            mCameraDevice = null;
+
         }
 
         @Override
         public void onError(@NonNull CameraDevice camera, int error) {
+            Log.d(TAG, "onError: 3333333333333333333333333");
             mCameraDevice.close();
             mCameraDevice = null;
+
         }
     };
 
