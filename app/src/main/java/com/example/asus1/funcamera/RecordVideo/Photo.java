@@ -135,5 +135,4 @@ public class Photo {
                 GLES20.GL_UNSIGNED_BYTE,mIndexbuffer);
     }
 
-
 }

@@ -53,7 +53,7 @@ public class CameraHelper  {
         int screenWidth = metrics.widthPixels;
         int screenHidth = metrics.heightPixels;
 
-
+        //设置图像像素比位4:3
         surfaceTexture.
                 setDefaultBufferSize(4*screenWidth/3,3 * screenWidth / 4);
         mSurface = new Surface(surfaceTexture);
@@ -61,6 +61,8 @@ public class CameraHelper  {
     }
 
     private void initCamera(){
+
+        //得到CameraManager
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
         try {
             for(String id : mCameraManager.getCameraIdList()){
@@ -69,10 +71,12 @@ public class CameraHelper  {
                         = mCameraManager.getCameraCharacteristics(id);
                 Integer front = characteristics.get(CameraCharacteristics.LENS_FACING);
                 mCameraId = id;
+                //是否支持闪光灯
                 Boolean available = characteristics.
                         get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                 mFlashSupport = available == null? false :available;
 
+                //启动前置摄像头
                 if(front!=null && front == CameraCharacteristics.LENS_FACING_FRONT){
                     break;
                 }
@@ -80,7 +84,7 @@ public class CameraHelper  {
 
             mMainHandler = new android.os.Handler(Looper.getMainLooper());
             if(mCameraId!=null){
-                Log.d(TAG, "initCamera: "+mCameraId);
+                //打开摄像头
                 mCameraManager.openCamera(mCameraId,mStateCallback
                         ,mMainHandler);
 
@@ -97,7 +101,7 @@ public class CameraHelper  {
         public void onOpened(@NonNull CameraDevice camera) {
 
             mCameraDevice = camera;
-            Log.d(TAG, "onOpened: " + mCameraId);
+            //开启预览
             createPreview();
         }
 
@@ -160,7 +164,5 @@ public class CameraHelper  {
             Log.d(TAG, "onConfigureFailed: ");
         }
     };
-
-
 
 }

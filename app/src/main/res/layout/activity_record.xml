@@ -6,8 +6,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".RecordVideo.RecordActivtiy">
+
     <com.example.asus1.funcamera.RecordVideo.RecordView
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/half_white"
+        android:paddingTop="24dp"
+        >
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/iv_back"
+            android:src="@mipmap/ic_back"
+            android:scaleType="centerCrop"
+            android:layout_marginLeft="16dp"
+            />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/iv_camera"
+            android:src="@mipmap/ic_camera"
+            android:layout_alignParentEnd="true"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="16dp"
+            />
+
+        <com.example.asus1.funcamera.RecordVideo.RecordButtonView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:id="@+id/view_record"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="6dp"
+            />
+
+        <ImageView
+            android:id="@+id/iv_filter"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_toStartOf="@+id/iv_camera"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_filter" />
+
+        <ImageView
+            android:id="@+id/iv_music"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_toEndOf="@+id/iv_back"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_music" />
+
+    </RelativeLayout>
+
 
 </FrameLayout>

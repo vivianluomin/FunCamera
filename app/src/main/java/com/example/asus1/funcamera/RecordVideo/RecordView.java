@@ -49,11 +49,10 @@ public class RecordView extends GLSurfaceView {
             GLES20.glClearColor(1,1,1,1);
             GLES20.glEnable(GLES20.GL_DEPTH_TEST);
             mPhoto = new Photo();
-            initTextureId();
-            mSurfaceTexture = new SurfaceTexture(mTextId);
+            initTextureId();//构建纹理id
+            mSurfaceTexture = new SurfaceTexture(mTextId);//构建用于预览的surfaceTexture
             mSurfaceTexture.setOnFrameAvailableListener(this);
-            mCamera = new CameraHelper(mContext,mSurfaceTexture);
-
+            mCamera = new CameraHelper(mContext,mSurfaceTexture);//开启预览
 
         }
 
@@ -66,8 +65,11 @@ public class RecordView extends GLSurfaceView {
         @Override
         public void onDrawFrame(GL10 gl) {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT|GLES20.GL_DEPTH_BUFFER_BIT);
+            //得到最新的图像
             mSurfaceTexture.updateTexImage();
+            //得到图像的纹理矩阵
             mSurfaceTexture.getTransformMatrix(mStMatrix);
+            //绘制图像
             mPhoto.draw(mTextId,mStMatrix);
         }
 
@@ -97,6 +99,4 @@ public class RecordView extends GLSurfaceView {
         }
         
     }
-
-   
 }
