@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
         </activity>
-        <activity android:name=".RecordVideo.RecordActivtiy" >
+        <activity android:name=".RecordVideo.Views.RecordActivtiy" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

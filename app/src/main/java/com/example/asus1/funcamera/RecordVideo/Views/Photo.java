@@ -1,4 +1,4 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.Views;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;

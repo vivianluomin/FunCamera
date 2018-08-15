@@ -62,7 +62,7 @@ public class ShaderUtil {
         return program;
     }
 
-    private static void checkGLError(String info){
+    public static void checkGLError(String info){
         int error;
         if((error = GLES20.glGetError())!=GLES20.GL_NO_ERROR){
             Log.e(ERROR,info+": glError "+error);

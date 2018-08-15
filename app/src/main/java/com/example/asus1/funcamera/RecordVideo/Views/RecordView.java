@@ -1,24 +1,30 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.Views;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.opengl.EGL14;
+import android.opengl.EGLContext;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.AttributeSet;
-import android.util.Log;
+
+import com.example.asus1.funcamera.RecordVideo.VideoRecordEncode;
+import com.example.asus1.funcamera.RecordVideo.Views.CameraHelper;
+import com.example.asus1.funcamera.RecordVideo.Views.Photo;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class RecordView extends GLSurfaceView {
 
-    private RecordRender mRender;
+    public RecordRender mRender;
+    public int mTextId;
     private  Context mContext;
     private float[] mStMatrix = new float[16];
+    private boolean mRequestUpdateTex = false;
+    private boolean mFlip = false;
 
     private static final String TAG = "RecordView";
 
@@ -31,17 +37,31 @@ public class RecordView extends GLSurfaceView {
         mContext = context;
         setEGLContextClientVersion(2);
         mRender = new RecordRender();
+        Matrix.setIdentityM(mStMatrix,0);
         setRenderer(mRender);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+    public void setVideoEndoer(final VideoRecordEncode endoer){
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mRender){
+                    endoer.setEGLContext(EGL14.eglGetCurrentContext(),mTextId);
+                    mRender.mEncode = endoer;
+                }
+            }
+        });
     }
 
 
     private class RecordRender implements Renderer,SurfaceTexture.OnFrameAvailableListener{
 
         private Photo mPhoto;
-        private int mTextId;
         private SurfaceTexture mSurfaceTexture;
         private CameraHelper mCamera;
         private float[] mProjMatrix = new float[16];
+        private VideoRecordEncode mEncode;
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -65,12 +85,26 @@ public class RecordView extends GLSurfaceView {
         @Override
         public void onDrawFrame(GL10 gl) {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT|GLES20.GL_DEPTH_BUFFER_BIT);
-            //得到最新的图像
-            mSurfaceTexture.updateTexImage();
-            //得到图像的纹理矩阵
-            mSurfaceTexture.getTransformMatrix(mStMatrix);
-            //绘制图像
+            if(mRequestUpdateTex){
+                mRequestUpdateTex = false;
+                //得到最新的图像
+                mSurfaceTexture.updateTexImage();
+                //得到图像的纹理矩阵
+                mSurfaceTexture.getTransformMatrix(mStMatrix);
+                //绘制图像
+            }
+
             mPhoto.draw(mTextId,mStMatrix);
+            mFlip = !mFlip;
+            if(mFlip){
+                synchronized (this){
+                    if(mEncode!=null){
+                        mEncode.onFrameAvaliable(mStMatrix);
+                    }
+
+                }
+
+            }
         }
 
         private void initTextureId(){
@@ -94,7 +128,7 @@ public class RecordView extends GLSurfaceView {
 
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
+            mRequestUpdateTex = true;
 
         }
         

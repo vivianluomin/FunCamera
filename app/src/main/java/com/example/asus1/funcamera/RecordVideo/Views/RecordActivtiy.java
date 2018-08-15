@@ -1,23 +1,22 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.Views;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
+import android.opengl.EGL14;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
+import com.example.asus1.funcamera.RecordVideo.VideoRecordEncode;
+import com.example.asus1.funcamera.RecordVideo.onFramPrepareLisnter;
 
 public class RecordActivtiy extends BaseActivity implements View.OnClickListener{
 
     private static final String TAG = "RecordActivtiy";
     private RecordButtonView mRecordButtom;
+    private RecordView mRecordView;
     private boolean mRecord = false;
+    private VideoRecordEncode mVideoEncode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +29,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     private void initView(){
         mRecordButtom = findViewById(R.id.view_record);
         mRecordButtom.setOnClickListener(this);
+        mRecordView = findViewById(R.id.view_display);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
             mRecord = false;
         }else {
             mRecordButtom.setClick(true);
-            startRecordUI();
+            startRecoord();
             mRecord = true;
         }
     }
@@ -84,4 +84,41 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
             }
         }).start();
     }
+
+    private void startRecoord(){
+        Log.d(TAG, "startRecoord: "+Thread.currentThread().getName());
+        mVideoEncode = new
+                VideoRecordEncode(lisnter,1280, 720);
+
+        mVideoEncode.prepare();
+        mVideoEncode.startRecord();
+        Log.d(TAG, "startRecoord:222222222222");
+        startRecordUI();
+
+
+    }
+
+    private  onFramPrepareLisnter lisnter = new onFramPrepareLisnter() {
+        @Override
+        public void onPrepare(VideoRecordEncode encode) {
+            mRecordView.setVideoEndoer(encode);
+            Log.d(TAG, "onPrepare: ");
+
+
+        }
+    };
+
+    @Override
+    protected void onPause() {
+        Log.d(TAG, "onPause: ");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop: ");
+        super.onStop();
+    }
+    
+    
 }

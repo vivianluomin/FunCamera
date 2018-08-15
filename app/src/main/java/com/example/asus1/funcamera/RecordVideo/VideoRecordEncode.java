@@ -1,0 +1,213 @@
+package com.example.asus1.funcamera.RecordVideo;
+
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
+import android.opengl.EGLContext;
+import android.os.HandlerThread;
+import android.print.PrinterId;
+import android.util.Log;
+import android.view.Surface;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+
+public class VideoRecordEncode implements Runnable {
+
+    private MediaCodec mViedeoEncode;
+    private final  String MIME_TYPE = "video/avc";
+    private static final int FRAME_RATE = 25;
+    private static final float BPP = 0.25f;
+    private Surface mSurface;
+
+    private static final String TAG = "VideoRecordEncode";
+
+    public boolean mLocalRquestStop = false;
+    public boolean mIsRunning = false;
+    public boolean mIsCaturing = false;
+
+    private int mRequestDrain = 0;
+    private Object mSync = new Object();
+
+    private int mWidth;
+    private int mHeight;
+    private int mTexId;
+    private EGLHelper mEGlHelper;
+    private EGLContext mShare_Context;
+    private MediaCodec.BufferInfo mBfferInfo;
+    private boolean mEnOS = false;
+
+    private onFramPrepareLisnter mPrepareLisnter;
+
+    public VideoRecordEncode(onFramPrepareLisnter prepareLisnter, int width, int height) {
+        mWidth = width;
+        mHeight = height;
+        mPrepareLisnter = prepareLisnter;
+
+        mBfferInfo = new MediaCodec.BufferInfo();
+
+
+    }
+
+    public void prepare(){
+
+        Log.d(TAG, "prepare: "+Thread.currentThread().getName());
+        try {
+            mEnOS = false;
+            mViedeoEncode = MediaCodec.createEncoderByType(MIME_TYPE);
+            MediaFormat format =  MediaFormat.createVideoFormat(MIME_TYPE,mWidth,mHeight);
+            format.setInteger(MediaFormat.KEY_BIT_RATE,calcBitRate());
+            format.setInteger(MediaFormat.KEY_FRAME_RATE,FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL,10);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+            mViedeoEncode.configure(format,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
+
+            //得到Surface用于编码
+            mSurface = mViedeoEncode.createInputSurface();
+            mViedeoEncode.start();
+            mPrepareLisnter.onPrepare(this);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void startRecord(){
+        mIsRunning = true;
+        mIsCaturing = true;
+        //mSync.notifyAll();
+        new Thread(this).start();
+    }
+
+    private int calcBitRate() {
+        final int bitrate = (int)(BPP * FRAME_RATE * mWidth * mHeight);
+        Log.i(TAG, String.format("bitrate=%5.2f[Mbps]", bitrate / 1024f / 1024f));
+        return bitrate;
+    }
+
+    public void onFrameAvaliable(float[] stMatrix){
+
+        mEGlHelper.render(mTexId,stMatrix);
+        synchronized (mSync){
+            if(!mIsCaturing||mLocalRquestStop){
+                return;
+            }
+            mRequestDrain++;
+            mSync.notifyAll();
+        }
+
+    }
+
+    public void setEGLContext(EGLContext context,int texId){
+        mShare_Context = context;
+        mTexId = texId;
+        mEGlHelper = new EGLHelper(mShare_Context,mSurface,texId);
+    }
+
+    @Override
+    public void run() {
+
+        boolean localRuqestDrain;
+        boolean localRequestStop;
+        while (mIsRunning){
+
+            synchronized (mSync){
+                localRequestStop = mLocalRquestStop;
+                localRuqestDrain = (mRequestDrain>0);
+                if(localRuqestDrain){
+                    mRequestDrain --;
+                }
+            }
+
+            if(localRequestStop){
+                drain();
+                mViedeoEncode.signalEndOfInputStream();
+                mEnOS = true;
+                drain();
+                release();
+                break;
+            }
+
+            if(localRuqestDrain){
+
+                drain();
+            }else {
+                synchronized (mSync){
+
+                    try {
+                        mSync.wait();
+                    }catch (InterruptedException e){
+                        break;
+                    }
+                }
+            }
+        }
+
+        synchronized (mSync){
+            mLocalRquestStop = true;
+            mIsCaturing = false;
+        }
+    }
+
+    private void drain(){
+        int count = 0;
+ LOOP:       while (mIsCaturing){
+            int encodeStatue = mViedeoEncode.
+                    dequeueOutputBuffer(mBfferInfo,10000);
+           if(encodeStatue == MediaCodec.INFO_TRY_AGAIN_LATER){
+               if(!mEnOS){
+                   if(++count >5){
+                       break LOOP;
+                   }
+               }
+           }else if(encodeStatue == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
+               Log.d(TAG, "drain: "+encodeStatue);
+
+           }else if(encodeStatue <0){
+               Log.d(TAG, "drain:unexpected result " +
+                       "from encoder#dequeueOutputBuffer: " + encodeStatue);
+           }else {
+               ByteBuffer byteBuffer = mViedeoEncode.getOutputBuffer(encodeStatue);
+               mBfferInfo.presentationTimeUs = getPTSUs();
+               prevOutputPTSUs = mBfferInfo.presentationTimeUs;
+               Log.d(TAG, "drain: "+byteBuffer);
+               mViedeoEncode.releaseOutputBuffer(encodeStatue,false);
+               if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                   // when EOS come.
+                   Log.d(TAG, "drain: EOS");
+                   mIsCaturing = false;
+                   break;      // out of while
+               }
+           }
+
+        }
+    }
+
+    private void release(){
+        if(mViedeoEncode != null){
+            mViedeoEncode.stop();
+            mViedeoEncode.release();
+            mViedeoEncode = null;
+        }
+    }
+
+    /**
+     * previous presentationTimeUs for writing
+     */
+    private long prevOutputPTSUs = 0;
+    /**
+     * get next encoding presentationTimeUs
+     * @return
+     */
+    protected long getPTSUs() {
+        long result = System.nanoTime() / 1000L;
+        // presentationTimeUs should be monotonic
+        // otherwise muxer fail to write
+        if (result < prevOutputPTSUs)
+            result = (prevOutputPTSUs - result) + result;
+        return result;
+    }
+}

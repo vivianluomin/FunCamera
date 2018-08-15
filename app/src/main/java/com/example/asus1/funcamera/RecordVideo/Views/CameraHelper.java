@@ -1,4 +1,4 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.Views;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;

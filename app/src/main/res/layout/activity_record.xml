@@ -5,11 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RecordVideo.RecordActivtiy">
+    tools:context=".RecordVideo.Views.RecordActivtiy">
 
-    <com.example.asus1.funcamera.RecordVideo.RecordView
+    <com.example.asus1.funcamera.RecordVideo.Views.RecordView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:id="@+id/view_display"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -36,7 +38,7 @@
             android:layout_marginEnd="16dp"
             />
 
-        <com.example.asus1.funcamera.RecordVideo.RecordButtonView
+        <com.example.asus1.funcamera.RecordVideo.Views.RecordButtonView
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:id="@+id/view_record"
