@@ -25,9 +25,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setWiondow();
-        setPermission();
     }
 
     protected void setWiondow(){
@@ -51,34 +49,4 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private void setPermission(){
-        String[] permissions = new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-        List<String> pers = new ArrayList<>();
-
-        for(String per :permissions){
-            if(ContextCompat.checkSelfPermission(this,per)
-                    != PackageManager.PERMISSION_GRANTED){
-                pers.add(per);
-            }
-        }
-
-        if(pers.size()>0){
-            ActivityCompat.requestPermissions(this,pers.toArray(new String[pers.size()]),
-                    100);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        for(int i = 0;i<grantResults.length;i++){
-            if(grantResults[i]!= PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this,getResources().
-                        getText(R.string.requestPermission),Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 }

@@ -4,10 +4,11 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.opengl.EGLContext;
-import android.os.HandlerThread;
-import android.print.PrinterId;
 import android.util.Log;
 import android.view.Surface;
+
+import com.example.asus1.funcamera.RecordVideo.EGLUtil.EGLHelper;
+import com.example.asus1.funcamera.RecordVideo.EGLUtil.RenderHandler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,17 +27,16 @@ public class VideoRecordEncode implements Runnable {
     public boolean mLocalRquestStop = false;
     public boolean mIsRunning = false;
     public boolean mIsCaturing = false;
-
     private int mRequestDrain = 0;
     private Object mSync = new Object();
 
     private int mWidth;
     private int mHeight;
     private int mTexId;
-    private EGLHelper mEGlHelper;
     private EGLContext mShare_Context;
     private MediaCodec.BufferInfo mBfferInfo;
     private boolean mEnOS = false;
+    private RenderHandler mHandler;
 
     private onFramPrepareLisnter mPrepareLisnter;
 
@@ -46,7 +46,7 @@ public class VideoRecordEncode implements Runnable {
         mPrepareLisnter = prepareLisnter;
 
         mBfferInfo = new MediaCodec.BufferInfo();
-
+        mHandler = RenderHandler.createRenderHandler();
 
     }
 
@@ -88,23 +88,23 @@ public class VideoRecordEncode implements Runnable {
         return bitrate;
     }
 
-    public void onFrameAvaliable(float[] stMatrix){
+    public boolean onFrameAvaliable(float[] stMatrix){
 
-        mEGlHelper.render(mTexId,stMatrix);
         synchronized (mSync){
             if(!mIsCaturing||mLocalRquestStop){
-                return;
+                return false;
             }
             mRequestDrain++;
             mSync.notifyAll();
         }
-
+        mHandler.draw(mTexId,stMatrix);
+        return true;
     }
 
     public void setEGLContext(EGLContext context,int texId){
         mShare_Context = context;
         mTexId = texId;
-        mEGlHelper = new EGLHelper(mShare_Context,mSurface,texId);
+       mHandler.setEGLContext(mShare_Context,mSurface,mTexId);
     }
 
     @Override

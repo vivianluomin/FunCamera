@@ -1,4 +1,4 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.EGLUtil;
 
 import android.content.Context;
 import android.opengl.EGL14;
@@ -103,15 +103,14 @@ public class EGLHelper {
         }
     }
 
-    public void makeCurrent(EGLSurface surface){
+    public void makeCurrent(){
 
-        EGL14.eglMakeCurrent(mDisplay,surface,surface,mEGLContext);
+        EGL14.eglMakeCurrent(mDisplay,mSurface,mSurface,mEGLContext);
     }
 
     public void render(int textid,float[] stMatrix){
         GLES20.glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        makeCurrent(mSurface);
         mPhoto.draw(textid,stMatrix);
         SwapSurface(mSurface);
     }
