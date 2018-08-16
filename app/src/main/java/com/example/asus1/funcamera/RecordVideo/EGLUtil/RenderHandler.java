@@ -21,11 +21,14 @@ public class RenderHandler implements Runnable {
     public static RenderHandler createRenderHandler(){
         RenderHandler handler = new RenderHandler();
         new Thread(handler).start();
-        try {
-            handler.mSyn.wait();
-        }catch (InterruptedException e){
-            return null;
+        synchronized (handler.mSyn){
+            try {
+                handler.mSyn.wait();
+            }catch (InterruptedException e){
+                return null;
+            }
         }
+
         return handler;
     }
 
@@ -44,40 +47,50 @@ public class RenderHandler implements Runnable {
 
     public void draw(int textId,float[] stMatrix){
         if(mRequestRelease) return;
+        synchronized (mSyn){
+            mTextId = textId;
+            System.arraycopy(stMatrix,0,mStMatrix,0,16);
+            mRequestDraw ++;
+            mSyn.notifyAll();
+        }
 
-        mTextId = textId;
-        System.arraycopy(stMatrix,0,mStMatrix,0,16);
-        mRequestDraw ++;
-        mSyn.notifyAll();
 
     }
 
 
     @Override
     public void run() {
+
         synchronized (mSyn){
             mRequestRelease= mRequestEGLContext = false;
             mRequestDraw = 0;
+            mSyn.notifyAll();
         }
         boolean localRequestDraw = false;
         for(;;){
-            if(mRequestRelease) break;
-            if(mRequestEGLContext){
-                mRequestEGLContext = false;
-                prepare();
-                mSyn.notifyAll();
+            synchronized (mSyn){
+                if(mRequestRelease) break;
+                if(mRequestEGLContext){
+                    mRequestEGLContext = false;
+                    prepare();
+                    mSyn.notifyAll();
+                }
             }
+
             localRequestDraw = mRequestDraw>0 ;
             if(localRequestDraw){
                 mRequestDraw --;
                 mEGLHelper.makeCurrent();
                 mEGLHelper.render(mTextId,mStMatrix);
             }else {
-                try {
-                    mSyn.wait();
-                }catch (InterruptedException e){
-                    break;
+                synchronized (mSyn){
+                    try {
+                        mSyn.wait();
+                    }catch (InterruptedException e){
+                        break;
+                    }
                 }
+
             }
         }
     }

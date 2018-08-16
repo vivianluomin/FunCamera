@@ -72,7 +72,7 @@ public class RecordView extends GLSurfaceView {
             initTextureId();//构建纹理id
             mSurfaceTexture = new SurfaceTexture(mTextId);//构建用于预览的surfaceTexture
             mSurfaceTexture.setOnFrameAvailableListener(this);
-            mCamera = new CameraHelper(mContext,mSurfaceTexture);//开启预览
+            mCamera = CameraHelper.createCamer(mContext,mSurfaceTexture);//开启预览
 
         }
 

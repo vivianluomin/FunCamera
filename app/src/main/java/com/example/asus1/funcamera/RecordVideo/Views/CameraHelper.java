@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
 
-public class CameraHelper  {
+public class CameraHelper implements Runnable {
 
     private Context mContext;
     private CameraManager mCameraManager;
@@ -36,12 +36,18 @@ public class CameraHelper  {
     private boolean mFlashSupport = false;
     private Surface mSurface;
     private CaptureRequest.Builder mPreviewBuilder;
+    private Object mSyn = new Object();
 
     private android.os.Handler mMainHandler;
     private android.os.Handler mChildHanlder;
 
     private static final String TAG = "CameraHelper";
 
+    public static CameraHelper createCamer(Context context,SurfaceTexture surfaceTexture){
+        CameraHelper cameraHelper = new CameraHelper(context,surfaceTexture);
+        new Thread(cameraHelper).start();
+        return cameraHelper;
+    }
 
     public CameraHelper(Context context, SurfaceTexture surfaceTexture){
 
@@ -57,7 +63,7 @@ public class CameraHelper  {
         surfaceTexture.
                 setDefaultBufferSize(4*screenWidth/3,3 * screenWidth / 4);
         mSurface = new Surface(surfaceTexture);
-        initCamera();
+
     }
 
     private void initCamera(){
@@ -95,6 +101,7 @@ public class CameraHelper  {
         }
 
     }
+
 
     private CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -165,4 +172,9 @@ public class CameraHelper  {
         }
     };
 
+
+    @Override
+    public void run() {
+        initCamera();
+    }
 }

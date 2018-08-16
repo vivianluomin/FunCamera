@@ -25,7 +25,7 @@ public class VideoRecordEncode implements Runnable {
     private static final String TAG = "VideoRecordEncode";
 
     public boolean mLocalRquestStop = false;
-    public boolean mIsRunning = false;
+    public boolean mIsRunning = true;
     public boolean mIsCaturing = false;
     private int mRequestDrain = 0;
     private Object mSync = new Object();
@@ -44,10 +44,16 @@ public class VideoRecordEncode implements Runnable {
         mWidth = width;
         mHeight = height;
         mPrepareLisnter = prepareLisnter;
-
         mBfferInfo = new MediaCodec.BufferInfo();
         mHandler = RenderHandler.createRenderHandler();
-
+        synchronized (mSync){
+            new Thread(this).start();
+            try {
+                mSync.wait();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     public void prepare(){
@@ -79,7 +85,7 @@ public class VideoRecordEncode implements Runnable {
         mIsRunning = true;
         mIsCaturing = true;
         //mSync.notifyAll();
-        new Thread(this).start();
+
     }
 
     private int calcBitRate() {
@@ -109,7 +115,12 @@ public class VideoRecordEncode implements Runnable {
 
     @Override
     public void run() {
-
+        Log.d(TAG, "run: "+Thread.currentThread().getName());
+        synchronized (mSync){
+            mLocalRquestStop = false;
+            mRequestDrain = 0;
+            mSync.notifyAll();
+        }
         boolean localRuqestDrain;
         boolean localRequestStop;
         while (mIsRunning){
@@ -138,6 +149,7 @@ public class VideoRecordEncode implements Runnable {
                 synchronized (mSync){
 
                     try {
+                        Log.d(TAG, "run: wait");
                         mSync.wait();
                     }catch (InterruptedException e){
                         break;
