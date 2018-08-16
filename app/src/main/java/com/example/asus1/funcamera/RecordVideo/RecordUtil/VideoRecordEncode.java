@@ -36,13 +36,18 @@ public class VideoRecordEncode implements Runnable {
     private MediaCodec.BufferInfo mBfferInfo;
     private boolean mEnOS = false;
     private RenderHandler mHandler;
+    private int mTrackIndex;
+    private VideoMediaMuxer mMuxer;
+
+    private boolean mMuxerStart = false;
 
     private onFramPrepareLisnter mPrepareLisnter;
 
-    public VideoRecordEncode(onFramPrepareLisnter prepareLisnter, int width, int height) {
+    public VideoRecordEncode(VideoMediaMuxer muxer,onFramPrepareLisnter prepareLisnter, int width, int height) {
         mWidth = width;
         mHeight = height;
         mPrepareLisnter = prepareLisnter;
+        mMuxer = muxer;
         mBfferInfo = new MediaCodec.BufferInfo();
         mHandler = RenderHandler.createRenderHandler();
         synchronized (mSync){
@@ -93,7 +98,7 @@ public class VideoRecordEncode implements Runnable {
         return bitrate;
     }
 
-    public boolean onFrameAvaliable(float[] stMatrix){
+    public boolean onFrameAvaliable(int textId,float[] stMatrix){
 
         synchronized (mSync){
             if(!mIsCaturing||mLocalRquestStop){
@@ -102,6 +107,7 @@ public class VideoRecordEncode implements Runnable {
             mRequestDrain++;
             mSync.notifyAll();
         }
+        mTexId = textId;
         mHandler.draw(mTexId,stMatrix);
         return true;
     }
@@ -177,6 +183,21 @@ public class VideoRecordEncode implements Runnable {
            }else if(encodeStatue == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
                Log.d(TAG, "drain: "+encodeStatue);
 
+               MediaFormat format = mViedeoEncode.getOutputFormat();
+               mTrackIndex = mMuxer.addTrack(format);
+               mMuxerStart = true;
+               if(!mMuxer.start()){
+                   synchronized (mMuxer){
+                       while (!mMuxer.isStarted()){
+                           try {
+                               mMuxer.wait(100);
+                           }catch (InterruptedException e){
+                               break LOOP;
+                           }
+                       }
+                   }
+               }
+
            }else if(encodeStatue <0){
                Log.d(TAG, "drain:unexpected result " +
                        "from encoder#dequeueOutputBuffer: " + encodeStatue);
@@ -184,7 +205,7 @@ public class VideoRecordEncode implements Runnable {
                ByteBuffer byteBuffer = mViedeoEncode.getOutputBuffer(encodeStatue);
                mBfferInfo.presentationTimeUs = getPTSUs();
                prevOutputPTSUs = mBfferInfo.presentationTimeUs;
-
+               mMuxer.writeSampleData(mTrackIndex,byteBuffer,mBfferInfo);
                mViedeoEncode.releaseOutputBuffer(encodeStatue,false);
                if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                    // when EOS come.
@@ -203,6 +224,30 @@ public class VideoRecordEncode implements Runnable {
             mViedeoEncode.release();
             mViedeoEncode = null;
         }
+
+        if (mMuxerStart) {
+            if (mMuxer != null) {
+                try {
+                    mMuxer.stop();
+                } catch (final Exception e) {
+                    Log.e(TAG, "failed stopping muxer", e);
+                }
+            }
+        }
+        mBfferInfo = null;
+    }
+
+    public void onStopRecording(){
+        synchronized (mSync){
+            if(!mIsCaturing||mLocalRquestStop){
+                return;
+            }
+            mIsCaturing = false;
+            mLocalRquestStop = true;
+            mHandler.stop();
+            mSync.notifyAll();
+        }
+
     }
 
     /**

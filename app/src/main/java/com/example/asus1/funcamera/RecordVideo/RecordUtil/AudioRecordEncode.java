@@ -40,14 +40,18 @@ public class AudioRecordEncode implements Runnable {
     private AudioThread mAudioThread;
 
     private MediaCodec mCodec;
+    private VideoMediaMuxer mMuxer;
+    private boolean mMuxerStart = false;
+    private int mTrackIndex;
 
     private MediaCodec.BufferInfo mBfferInfo;
 
     private static final String TAG = "AudioRecordEncode";
 
-    public AudioRecordEncode() {
+    public AudioRecordEncode(VideoMediaMuxer muxer) {
 
         mBfferInfo = new MediaCodec.BufferInfo();
+        mMuxer = muxer;
 
         synchronized (mSyn){
             new Thread(this).start();
@@ -113,7 +117,7 @@ public class AudioRecordEncode implements Runnable {
 
             if(localRequestStop){
                 drain();
-                mCodec.signalEndOfInputStream();
+                encode(null,0,getPTSUs());
                 mEOS = true;
                 drain();
                 release();
@@ -155,6 +159,22 @@ public class AudioRecordEncode implements Runnable {
                 }
             }else if(encodeStatue == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
                 Log.d(TAG, "drain: "+encodeStatue);
+
+                MediaFormat format = mCodec.getOutputFormat();
+                mTrackIndex = mMuxer.addTrack(format);
+                mMuxerStart = true;
+                if(!mMuxer.start()){
+                    synchronized (mMuxer){
+                        while (!mMuxer.isStarted()){
+                            try {
+                                mMuxer.wait(100);
+                            }catch (InterruptedException e){
+                                break LOOP;
+                            }
+                        }
+                    }
+                }
+
             }else if(encodeStatue <0){
                 Log.d(TAG, "drain:unexpected result " +
                         "from encoder#dequeueOutputBuffer: " + encodeStatue);
@@ -162,7 +182,7 @@ public class AudioRecordEncode implements Runnable {
                 ByteBuffer byteBuffer = mCodec.getOutputBuffer(encodeStatue);
                 mBfferInfo.presentationTimeUs = getPTSUs();
                 prevOutputPTSUs = mBfferInfo.presentationTimeUs;
-                Log.d(TAG, "drain: "+byteBuffer);
+                mMuxer.writeSampleData(mTrackIndex,byteBuffer,mBfferInfo);
                 mCodec.releaseOutputBuffer(encodeStatue,false);
                 if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     // when EOS come.
@@ -181,6 +201,29 @@ public class AudioRecordEncode implements Runnable {
             mCodec.release();
             mCodec = null;
         }
+
+        if (mMuxerStart) {
+            if (mMuxer != null) {
+                try {
+                    mMuxer.stop();
+                } catch (final Exception e) {
+                    Log.e(TAG, "failed stopping muxer", e);
+                }
+            }
+        }
+        mBfferInfo = null;
+    }
+
+    public void onStopRecording(){
+        synchronized (mSyn){
+            if(!mIsCapturing||mRuestStop){
+                return;
+            }
+            mIsCapturing = false;
+            mRuestStop = true;
+            mSyn.notifyAll();
+        }
+
     }
 
     private void onFrameAvaliable(){
@@ -212,7 +255,7 @@ public class AudioRecordEncode implements Runnable {
             if(mAudioRecord!=null){
                 try {
                     if(mIsCapturing){
-                        Log.d(TAG, "run: "+mIsCapturing);
+
                         ByteBuffer buffer = ByteBuffer.allocateDirect(SAMPLES_PER_FRAME);
                         mAudioRecord.startRecording();
                         int readSize;
@@ -220,7 +263,7 @@ public class AudioRecordEncode implements Runnable {
                             for(;mIsCapturing && !mRuestStop && !mEOS;){
                                 buffer.clear();
                                 readSize =  mAudioRecord.read(buffer,SAMPLES_PER_FRAME);
-                                Log.d(TAG, "run:audioThread "+readSize);
+
                                 if(readSize>0){
                                     buffer.position(readSize);
                                     buffer.flip();
@@ -258,7 +301,6 @@ public class AudioRecordEncode implements Runnable {
         int index;
         while (mIsCapturing){
             index = mCodec.dequeueInputBuffer(presentationTimeUs);
-            Log.d(TAG, "encode:index "+index);
             if(index>0){
                 inputBuffer = mCodec.getInputBuffer(index);
                 inputBuffer.clear();

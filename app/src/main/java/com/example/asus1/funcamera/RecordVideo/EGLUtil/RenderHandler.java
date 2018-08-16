@@ -2,6 +2,7 @@ package com.example.asus1.funcamera.RecordVideo.EGLUtil;
 
 import android.opengl.EGLContext;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.view.Surface;
 
 import com.example.asus1.funcamera.RecordVideo.Views.Photo;
@@ -17,6 +18,8 @@ public class RenderHandler implements Runnable {
     private Object mSyn = new Object();
     private float[] mStMatrix = new float[16];
     private boolean mRequestRelease = false;
+
+    private static final String TAG = "RenderHandler";
 
     public static RenderHandler createRenderHandler(){
         RenderHandler handler = new RenderHandler();
@@ -34,6 +37,7 @@ public class RenderHandler implements Runnable {
 
     private void prepare(){
         mEGLHelper = new EGLHelper(mShareContext,mLinkSurface,mTextId);
+        mSyn.notifyAll();
     }
 
     public void setEGLContext(EGLContext context,Surface surface,int textId){
@@ -49,7 +53,8 @@ public class RenderHandler implements Runnable {
         if(mRequestRelease) return;
         synchronized (mSyn){
             mTextId = textId;
-            System.arraycopy(stMatrix,0,mStMatrix,0,16);
+           // System.arraycopy(stMatrix,0,mStMatrix,0,16);
+            mStMatrix = stMatrix;
             mRequestDraw ++;
             mSyn.notifyAll();
         }
@@ -57,6 +62,13 @@ public class RenderHandler implements Runnable {
 
     }
 
+    public void stop(){
+        synchronized (mSyn){
+            if(mRequestRelease) return;
+            mRequestRelease = true;
+        }
+
+    }
 
     @Override
     public void run() {
@@ -73,15 +85,17 @@ public class RenderHandler implements Runnable {
                 if(mRequestEGLContext){
                     mRequestEGLContext = false;
                     prepare();
-                    mSyn.notifyAll();
                 }
             }
 
             localRequestDraw = mRequestDraw>0 ;
             if(localRequestDraw){
-                mRequestDraw --;
-                mEGLHelper.makeCurrent();
-                mEGLHelper.render(mTextId,mStMatrix);
+                if(mTextId>=0){
+                    mRequestDraw --;
+                    mEGLHelper.makeCurrent();
+                    mEGLHelper.render(mTextId,mStMatrix);
+                }
+
             }else {
                 synchronized (mSyn){
                     try {

@@ -13,6 +13,8 @@ import android.view.Surface;
 import com.example.asus1.funcamera.RecordVideo.Views.Photo;
 import com.example.asus1.funcamera.Utils.ShaderUtil;
 
+import javax.microedition.khronos.egl.EGL;
+
 
 public class EGLHelper {
 
@@ -25,6 +27,8 @@ public class EGLHelper {
     private Photo mPhoto;
     private static final int EGL_RECORDABLE_ANDROID = 0x3142;
     private EGLConfig mConfig;
+    private int mWidth;
+    private int mHeight;
 
     private static final String TAG = "EGLHelper";
 
@@ -32,8 +36,9 @@ public class EGLHelper {
 
         mShare_Context = context;
         mlinkSurface = surface;
-        mPhoto = new Photo();
         init();
+        mPhoto = new Photo();
+        mlinkSurface = null;
 
     }
 
@@ -58,7 +63,6 @@ public class EGLHelper {
                 EGL14.EGL_RED_SIZE,8,
                 EGL14.EGL_RENDERABLE_TYPE,EGL14.EGL_OPENGL_ES2_BIT,
                 EGL14.EGL_SURFACE_TYPE,EGL14.EGL_WINDOW_BIT,
-                EGL_RECORDABLE_ANDROID, 1,
                 EGL14.EGL_NONE
         };
 
@@ -82,6 +86,9 @@ public class EGLHelper {
             ShaderUtil.checkGLError("eglCreateContext");
         }
 
+        final int[] values = new int[1];
+        EGL14.eglQueryContext(mDisplay, mEGLContext, EGL14.EGL_CONTEXT_CLIENT_VERSION, values, 0);
+
         mSurface =EGL14.EGL_NO_SURFACE;
 
         int[] surfaceAttribs = {
@@ -89,8 +96,17 @@ public class EGLHelper {
         };
         mSurface = EGL14.eglCreateWindowSurface(mDisplay,mConfig,
                 mlinkSurface,surfaceAttribs,0);
-        ShaderUtil.checkGLError("eglCreateWindowSurface");
+       mWidth = querySurface(mSurface, EGL14.EGL_WIDTH);
+       mHeight = querySurface(mSurface,EGL14.EGL_HEIGHT);
+        Log.d(TAG, "init: "+mWidth+"---"+mHeight);
+       EGL14.eglMakeCurrent(mDisplay,mSurface,mSurface,mEGLContext);
 
+    }
+
+    public int querySurface(final EGLSurface eglSurface, final int what) {
+        final int[] value = new int[1];
+        EGL14.eglQuerySurface(mDisplay, eglSurface, what, value, 0);
+        return value[0];
     }
 
 
@@ -109,8 +125,9 @@ public class EGLHelper {
     }
 
     public void render(int textid,float[] stMatrix){
-        GLES20.glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glViewport(0,0,mWidth,mHeight);
         mPhoto.draw(textid,stMatrix);
         SwapSurface(mSurface);
     }
