@@ -3,16 +3,13 @@ package com.example.asus1.funcamera.RecordVideo.Views;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
-import android.opengl.EGLContext;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.AttributeSet;
 
-import com.example.asus1.funcamera.RecordVideo.VideoRecordEncode;
-import com.example.asus1.funcamera.RecordVideo.Views.CameraHelper;
-import com.example.asus1.funcamera.RecordVideo.Views.Photo;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

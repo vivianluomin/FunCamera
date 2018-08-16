@@ -1,4 +1,4 @@
-package com.example.asus1.funcamera.RecordVideo;
+package com.example.asus1.funcamera.RecordVideo.RecordUtil;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -7,7 +7,6 @@ import android.opengl.EGLContext;
 import android.util.Log;
 import android.view.Surface;
 
-import com.example.asus1.funcamera.RecordVideo.EGLUtil.EGLHelper;
 import com.example.asus1.funcamera.RecordVideo.EGLUtil.RenderHandler;
 
 import java.io.IOException;
@@ -185,7 +184,7 @@ public class VideoRecordEncode implements Runnable {
                ByteBuffer byteBuffer = mViedeoEncode.getOutputBuffer(encodeStatue);
                mBfferInfo.presentationTimeUs = getPTSUs();
                prevOutputPTSUs = mBfferInfo.presentationTimeUs;
-               Log.d(TAG, "drain: "+byteBuffer);
+
                mViedeoEncode.releaseOutputBuffer(encodeStatue,false);
                if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                    // when EOS come.

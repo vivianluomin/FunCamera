@@ -28,7 +28,8 @@ public class SplashActivity extends BaseActivity{
         String[] permissions = new String[]{
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO
         };
         List<String> pers = new ArrayList<>();
 
@@ -44,8 +45,9 @@ public class SplashActivity extends BaseActivity{
                     100);
         }else {
             startActivity(new Intent(this, RecordActivtiy.class));
+            finish();
         }
-        finish();
+
     }
 
     @Override

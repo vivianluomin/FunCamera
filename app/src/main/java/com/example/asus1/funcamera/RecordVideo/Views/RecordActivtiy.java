@@ -1,14 +1,14 @@
 package com.example.asus1.funcamera.RecordVideo.Views;
 
-import android.opengl.EGL14;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
-import com.example.asus1.funcamera.RecordVideo.VideoRecordEncode;
-import com.example.asus1.funcamera.RecordVideo.onFramPrepareLisnter;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.AudioRecordEncode;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.onFramPrepareLisnter;
 
 public class RecordActivtiy extends BaseActivity implements View.OnClickListener{
 
@@ -17,6 +17,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     private RecordView mRecordView;
     private boolean mRecord = false;
     private VideoRecordEncode mVideoEncode;
+    private AudioRecordEncode mAudioEncode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,10 +90,11 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         Log.d(TAG, "startRecoord: "+Thread.currentThread().getName());
         mVideoEncode = new
                 VideoRecordEncode(lisnter,1280, 720);
-
+        mAudioEncode = new AudioRecordEncode();
         mVideoEncode.prepare();
+        mAudioEncode.onPerpare();
         mVideoEncode.startRecord();
-        Log.d(TAG, "startRecoord:222222222222");
+        mAudioEncode.startRecording();
         startRecordUI();
 
 
