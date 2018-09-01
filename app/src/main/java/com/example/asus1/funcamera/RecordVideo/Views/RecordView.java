@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 import android.util.AttributeSet;
 
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
+import com.example.asus1.funcamera.Utils.Constant;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -36,6 +37,7 @@ public class RecordView extends GLSurfaceView {
         mRender = new RecordRender();
         Matrix.setIdentityM(mStMatrix,0);
         setRenderer(mRender);
+        Constant.GLOABLE_CONTXT = context;
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
@@ -64,7 +66,7 @@ public class RecordView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
             GLES20.glClearColor(1,1,1,1);
-            mPhoto = new Photo();
+            mPhoto = new BeautyPhoto();
             initTextureId();//构建纹理id
             mSurfaceTexture = new SurfaceTexture(mTextId);//构建用于预览的surfaceTexture
             mSurfaceTexture.setOnFrameAvailableListener(this);
@@ -75,6 +77,7 @@ public class RecordView extends GLSurfaceView {
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
             GLES20.glViewport(0,0,width,height);
+            mPhoto.setSize(width,height);
 
         }
 

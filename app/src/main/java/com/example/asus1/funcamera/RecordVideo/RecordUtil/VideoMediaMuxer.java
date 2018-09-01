@@ -54,16 +54,18 @@ public class VideoMediaMuxer implements ModelController {
     }
 
     public void preprare(){
+        //MediaCodec初始化
         mVideoEncode.prepare();
         mAudioEndoe.onPerpare();
     }
 
     @Override
     public void startRecording(){
-
+            //开始录制
             mVideoEncode = new
                     VideoRecordEncode(this,lisnter,1280, 720);
             mAudioEndoe = new AudioRecordEncode(this);
+            //判断有几个MediaCodec
             this.addEncode(mVideoEncode,mAudioEndoe);
             this.preprare();
         mVideoEncode.startRecord();
@@ -84,6 +86,7 @@ public class VideoMediaMuxer implements ModelController {
     }
 
     synchronized public boolean start(){
+        //当两个MediaCodec都准备好了，才可以写入文件
         mStartEncodeCount++;
         Log.d(TAG, "start: "+mStartEncodeCount);
         if(mEncodeCount>0&&(mStartEncodeCount == mEncodeCount)){
@@ -109,6 +112,7 @@ public class VideoMediaMuxer implements ModelController {
     }
 
     public void writeSampleData(int mediaTrack, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo){
+        //写入文件
         if(mStartEncodeCount>0){
             mMediaMuxer.writeSampleData(mediaTrack,byteBuffer,bufferInfo);
         }

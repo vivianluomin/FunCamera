@@ -1,9 +1,11 @@
 package com.example.asus1.funcamera.RecordVideo.Views;
 
+import android.content.Context;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
+import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.Utils.ShaderUtil;
 
 import java.nio.ByteBuffer;
@@ -12,7 +14,7 @@ import java.nio.FloatBuffer;
 
 public class Photo {
 
-    private String mVertexShder =
+    protected String mVertexShder =
             "attribute vec4 aPosition;" +
             "attribute vec4 aTexCoord;" +
             "varying vec2 vTextureCoord;" +
@@ -23,7 +25,8 @@ public class Photo {
             "vTextureCoord = (uTexMatrix * aTexCoord).xy;" +
             "}";
 
-    private String mFragmentShader = "#extension GL_OES_EGL_image_external : require\n" +
+    private String mFragmentShader =
+            "#extension GL_OES_EGL_image_external : require\n" +
             "precision highp float;" +
             "varying vec2 vTextureCoord;" +
             "uniform samplerExternalOES uSampler;" +
@@ -45,12 +48,21 @@ public class Photo {
     private int mVCount = 4;
     private int mIndexCount = 6;
 
+    protected int mInputWidth;
+    protected int mInputHeight;
+
+
     private float[] mMvpMatrix = new float[16];
     private float[] mMMatrix = new float[16];
 
     public Photo(){
         initVertexData();
         initFragmentData();
+    }
+
+    public void setSize(int width,int height){
+        mInputWidth = width;
+        mInputHeight = height;
     }
 
     private void initVertexData(){
@@ -93,13 +105,17 @@ public class Photo {
 
     }
 
-    private void initFragmentData(){
+    protected void initFragmentData(){
 
-        mProgram = ShaderUtil.loadProgram(mVertexShder,mFragmentShader);
+        mProgram = ShaderUtil.loadProgram(mVertexShder, mFragmentShader);
         maPositionHandle = GLES20.glGetAttribLocation(mProgram,"aPosition");
         maTextureHandle = GLES20.glGetAttribLocation(mProgram,"aTexCoord");
         muMvpMatrixHandle = GLES20.glGetUniformLocation(mProgram,"uMvpMatrix");
         muTexMatrixHandle = GLES20.glGetUniformLocation(mProgram,"uTexMatrix");
+
+    }
+
+    protected void filter(){
 
     }
 
@@ -112,6 +128,8 @@ public class Photo {
                 false,2*4,mTextureBuffer);
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         GLES20.glEnableVertexAttribArray(maTextureHandle);
+
+        filter();
 
         if(sTMatrix!=null){
 

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.RecordVideo.Views.RecordActivtiy;
+import com.example.asus1.funcamera.Utils.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class SplashActivity extends BaseActivity{
         }
 
         startActivity(new Intent(this, RecordActivtiy.class));
+        Constant.GLOABLE_CONTXT = getApplicationContext();
         finish();
     }
 }

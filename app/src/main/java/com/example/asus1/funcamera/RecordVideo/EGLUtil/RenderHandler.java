@@ -59,7 +59,6 @@ public class RenderHandler implements Runnable {
             mSyn.notifyAll();
         }
 
-
     }
 
     public void stop(){

@@ -36,6 +36,7 @@ public class EGLHelper {
 
         mShare_Context = context;
         mlinkSurface = surface;
+        //先创建环境
         init();
         mPhoto = new Photo();
         mlinkSurface = null;
