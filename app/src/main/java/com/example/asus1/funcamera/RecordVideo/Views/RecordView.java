@@ -23,6 +23,7 @@ public class RecordView extends GLSurfaceView {
     private float[] mStMatrix = new float[16];
     private boolean mRequestUpdateTex = false;
     private boolean mFlip = false;
+    private Class mType;
 
     private static final String TAG = "RecordView";
 
@@ -39,6 +40,10 @@ public class RecordView extends GLSurfaceView {
         setRenderer(mRender);
         Constant.GLOABLE_CONTXT = context;
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+    public void setType(Class object){
+        mType = object;
     }
 
     public void setVideoEndoer(final VideoRecordEncode endoer){
@@ -66,11 +71,18 @@ public class RecordView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
             GLES20.glClearColor(1,1,1,1);
-            mPhoto = new BeautyPhoto();
-            initTextureId();//构建纹理id
-            mSurfaceTexture = new SurfaceTexture(mTextId);//构建用于预览的surfaceTexture
-            mSurfaceTexture.setOnFrameAvailableListener(this);
-            mCamera = CameraHelper.createCamer(mContext,mSurfaceTexture);//开启预览
+            try {
+                mPhoto = (Photo) mType.newInstance();
+                initTextureId();//构建纹理id
+                mSurfaceTexture = new SurfaceTexture(mTextId);//构建用于预览的surfaceTexture
+                mSurfaceTexture.setOnFrameAvailableListener(this);
+                mCamera = CameraHelper.createCamer(mContext,mSurfaceTexture);//开启预览
+
+            }catch (InstantiationException e){
+
+            }catch (IllegalAccessException ee){
+
+            }
 
         }
 

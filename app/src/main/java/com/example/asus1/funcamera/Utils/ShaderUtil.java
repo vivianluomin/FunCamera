@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -68,6 +69,27 @@ public class ShaderUtil {
         return program;
     }
 
+
+    public static String readShderFromAssets(String filename,Context context){
+        String result = "";
+        try {
+            InputStream inputStream = context.getAssets().open(filename);
+            int ch = 0;
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            while ((ch = inputStream.read())!=-1){
+                byteArrayOutputStream.write(ch);
+            }
+            byte[] bytes = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
+            result = new String(bytes,"UTF-8");
+            result = result.replaceAll("\\r\\n","\n");
+            inputStream.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     public static String readShaderFromRawResource(final int resourceId, Context context){
         final InputStream inputStream = context.getResources().openRawResource(

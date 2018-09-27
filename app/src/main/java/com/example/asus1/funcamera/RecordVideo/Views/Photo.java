@@ -6,6 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.example.asus1.funcamera.R;
+import com.example.asus1.funcamera.Utils.Constant;
 import com.example.asus1.funcamera.Utils.ShaderUtil;
 
 import java.nio.ByteBuffer;
@@ -34,6 +35,8 @@ public class Photo {
             "gl_FragColor = texture2D(uSampler,vTextureCoord);" +
             "}";
 
+
+
     private int maPositionHandle;
     private int maTextureHandle;
     private int muMvpMatrixHandle;
@@ -43,7 +46,7 @@ public class Photo {
     private FloatBuffer mTextureBuffer;
     private ByteBuffer mIndexbuffer;
 
-    private int mProgram;
+    protected int mProgram;
 
     private int mVCount = 4;
     private int mIndexCount = 6;
@@ -57,7 +60,7 @@ public class Photo {
 
     public Photo(){
         initVertexData();
-        initFragmentData();
+        initProgram();
     }
 
     public void setSize(int width,int height){
@@ -104,10 +107,14 @@ public class Photo {
         mIndexbuffer.position(0);
 
     }
+    protected void initProgram(){
+        //mFragmentShader = ShaderUtil.readShderFromAssets("normal.sh", Constant.GLOABLE_CONTXT);
+        mProgram = ShaderUtil.loadProgram(mVertexShder, mFragmentShader);
+        initFragmentData();
+    }
 
     protected void initFragmentData(){
 
-        mProgram = ShaderUtil.loadProgram(mVertexShder, mFragmentShader);
         maPositionHandle = GLES20.glGetAttribLocation(mProgram,"aPosition");
         maTextureHandle = GLES20.glGetAttribLocation(mProgram,"aTexCoord");
         muMvpMatrixHandle = GLES20.glGetUniformLocation(mProgram,"uMvpMatrix");
@@ -147,7 +154,7 @@ public class Photo {
                 1,false,mMvpMatrix,0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,textId);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textId);
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES,mIndexCount,
                 GLES20.GL_UNSIGNED_BYTE,mIndexbuffer);
