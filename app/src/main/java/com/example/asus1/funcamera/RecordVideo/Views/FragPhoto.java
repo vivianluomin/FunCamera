@@ -12,10 +12,7 @@ public class FragPhoto extends Photo {
         super();
     }
 
-    @Override
-    protected void initFragmentData() {
-        super.initFragmentData();
-    }
+
 
     @Override
     protected void initProgram() {

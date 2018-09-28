@@ -154,7 +154,7 @@ public class Photo {
                 1,false,mMvpMatrix,0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textId);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,textId);
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES,mIndexCount,
                 GLES20.GL_UNSIGNED_BYTE,mIndexbuffer);
