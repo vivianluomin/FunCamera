@@ -15,7 +15,6 @@ void main(){
     vec4 upleftColor = texture2D(sTexture,upleftUV);
 
     vec4 delColor = curColor - upleftColor;
-    float luminance = dot(delColor.rgb,W);
 
     gl_FragColor = vec4(vec3(dot(delColor.rgb,W)),0.0)+bkColor;
 }

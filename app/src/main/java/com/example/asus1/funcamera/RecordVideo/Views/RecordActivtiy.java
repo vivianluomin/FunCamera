@@ -35,7 +35,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mRecordButtom = findViewById(R.id.view_record);
         mRecordButtom.setOnClickListener(this);
         mRecordView = findViewById(R.id.view_display);
-        mRecordView.setType(FuDiaoPhoto.class);
+        mRecordView.setType(Photo.class);
     }
 
     @Override

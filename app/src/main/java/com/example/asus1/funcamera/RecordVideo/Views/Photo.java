@@ -108,7 +108,7 @@ public class Photo {
 
     }
     protected void initProgram(){
-        //mFragmentShader = ShaderUtil.readShderFromAssets("normal.sh", Constant.GLOABLE_CONTXT);
+        mFragmentShader = ShaderUtil.readShderFromAssets("normal.sh", Constant.GLOABLE_CONTXT);
         mProgram = ShaderUtil.loadProgram(mVertexShder, mFragmentShader);
         initFragmentData();
     }
