@@ -44,12 +44,16 @@ void main(){
 
     vec3 finalColor = (centerColor+high_pass*2.0-cha);
     finalColor.r = clamp(pow(finalColor.r,0.5),0.0,1.0);
-    finalColor.g = clamp(pow(finalColor.g,0.6),0.0,1.0);
+    finalColor.g = clamp(pow(finalColor.g,0.7),0.0,1.0);
     finalColor.b = clamp(pow(finalColor.b,0.5),0.0,1.0);
     vec3 rouguang = 2.0*centerColor*finalColor+centerColor*centerColor-2.0*centerColor*centerColor*finalColor;
-
-    gl_FragColor = vec4( finalColor,1.0);
-    vec3 cc = gl_FragColor.rgb*0.4+rouguang*0.6;
+    float cb = 0.5*finalColor.r*255.0-0.4187*finalColor.g*255.0-0.0813*finalColor.b*255.0+128.0;
+    float cr = 0.1687*finalColor.r*255.0-0.3313*finalColor.g*255.0+0.5*finalColor.b*255.0+128.0;
+    if((cr>=133.0&&cr<=173.0)||(cb>=77.0&&cb<=127.0)){
+        //finalColor+=vec3(0.1,0.20,0.2);
+    }
+    gl_FragColor = vec4( finalColor,0.5);
+    vec3 cc = gl_FragColor.rgb*0.2+rouguang*0.8;
     gl_FragColor.rgb = cc;
 
 }
