@@ -3,6 +3,7 @@ package com.example.asus1.funcamera.RecordVideo.Views;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
@@ -32,9 +33,9 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     }
 
     private void initView(){
-        mRecordButtom = findViewById(R.id.view_record);
+        mRecordButtom = (RecordButtonView) findViewById(R.id.view_record);
         mRecordButtom.setOnClickListener(this);
-        mRecordView = findViewById(R.id.view_display);
+        mRecordView = (RecordView) findViewById(R.id.view_display);
         mRecordView.setType(Photo.class);
     }
 

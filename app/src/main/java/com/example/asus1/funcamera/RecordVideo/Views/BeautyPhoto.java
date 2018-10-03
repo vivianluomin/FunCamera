@@ -36,8 +36,7 @@ public class BeautyPhoto extends Photo {
 
     @Override
     protected void initFragmentData() {
-        mProgram = ShaderUtil.loadProgram(mVertexShder, ShaderUtil.
-                readShaderFromRawResource(R.raw.beauty, Constant.GLOABLE_CONTXT));
+        mProgram = ShaderUtil.loadProgram(mVertexShder, ShaderUtil.readShderFromAssets("", Constant.GLOABLE_CONTXT));
         maPositionHandle = GLES20.glGetAttribLocation(mProgram,"aPosition");
         maTextureHandle = GLES20.glGetAttribLocation(mProgram,"aTexCoord");
         muMvpMatrixHandle = GLES20.glGetUniformLocation(mProgram,"uMvpMatrix");

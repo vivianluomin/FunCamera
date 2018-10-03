@@ -53,7 +53,7 @@ void main(){
         //finalColor+=vec3(0.1,0.20,0.2);
     }
     gl_FragColor = vec4( finalColor,0.5);
-    vec3 cc = gl_FragColor.rgb*0.2+rouguang*0.8;
+    vec3 cc = gl_FragColor.rgb*0.2 +rouguang*0.8;
     gl_FragColor.rgb = cc;
 
 }
