@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_music_name"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:text="萌萌哒-天团"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_music_time"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:text="3:23"
+        android:layout_gravity="end"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="@color/divide_color"
+        android:layout_marginTop="10dp"
+        />
+
+</FrameLayout>

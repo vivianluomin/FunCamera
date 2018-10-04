@@ -19,6 +19,8 @@ import com.example.asus1.funcamera.Utils.Constant;
 import com.example.asus1.funcamera.Utils.JSSecretWebView;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
 import com.github.lzyzsd.jsbridge.CallBackFunction;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,16 +49,6 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       mWebView = (BridgeWebView)findViewById(R.id.web_view);
 
-        mWebView.loadUrl("file:///android_asset/core.html");
-
-       //mWebView.getParams("1313898095");
-        mWebView.callHandler("myFunC", "1313898095", new CallBackFunction() {
-            @Override
-            public void onCallBack(String data) {
-                System.out.println(data+"------------------");
-            }
-        });
     }
 }
