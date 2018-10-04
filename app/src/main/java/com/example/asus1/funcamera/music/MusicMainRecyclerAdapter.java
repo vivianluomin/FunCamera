@@ -31,10 +31,11 @@ public class MusicMainRecyclerAdapter extends RecyclerView.Adapter<MusicMainHold
     @Override
     public void onBindViewHolder(MusicMainHolder holder, int position) {
 
+        holder.setData(mDats.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mDats.size();
     }
 }

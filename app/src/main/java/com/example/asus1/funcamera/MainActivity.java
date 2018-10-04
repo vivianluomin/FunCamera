@@ -49,6 +49,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mWebView = (BridgeWebView)findViewById(R.id.web_view);
+        mWebView.loadUrl("http://www.kugou.com/yy/rank/home/1-6666.html?from=rank");
     }
 }

@@ -36,7 +36,7 @@
                 android:gravity="center"
                 android:text="酷狗飙升榜"
                 android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
 
         </FrameLayout>
 
@@ -60,9 +60,9 @@
         android:layout_height="match_parent"
         android:id="@+id/recycler_view_left"
         android:layout_gravity = "left"
-        android:background="#A4D3EE"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
+        android:background="#B4CDCD"
+        android:paddingLeft="16dp"
+        android:padding="10dp"
         >
 
 
