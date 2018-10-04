@@ -7,12 +7,17 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
+import com.github.lzyzsd.jsbridge.BridgeWebView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -36,6 +41,9 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
     private Handler mHandler;
     private final int MSG_INIT = 100;
     private final int MSG_UPDATE = 200;
+    private final int MSG_PLAY = 300;
+
+    BridgeWebView mWebView;
 
     private String mUrl = "http://www.kugou.com/yy/rank/home/1-6666.html?from=rank";
 
@@ -46,6 +54,7 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_music);
         mHandler = new Handler(getMainLooper(),this);
+        EventBus.getDefault().register(this);
         init();
     }
 
@@ -108,6 +117,10 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
                 break;
 
             case MSG_UPDATE:
+                Log.d(TAG, "handleMessage: "+mMainData.size());
+                String string = (String) msg.obj;
+                mTitle.setText(string);
+                mMainAdapter.notifyDataSetChanged();
                 break;
         }
 
@@ -117,7 +130,7 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
     private Element connect(String url){
 
         try {
-            Document document = Jsoup.connect(mUrl).get();
+            Document document = Jsoup.connect(url).get();
             Element body = document.body();
 
             Element content = body.getElementsByClass("pc_temp_wrap").first();
@@ -176,5 +189,48 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
         }
 
         return models;
+    }
+
+    @Subscribe
+    public void changeMusic(final ChangeMessage message){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<MusicModel> musicModels = getMusicData(connect(message.getSrc()));
+                Log.d(TAG, "run: "+message.getSrc());
+                Log.d(TAG, "run: "+musicModels.get(0).getmTitle());
+                mMainData.clear();
+                mMainData.addAll(musicModels);
+                mHandler.obtainMessage(MSG_UPDATE,message.getTitle()).sendToTarget();
+            }
+        }).start();
+
+
+    }
+
+    @Subscribe
+    public void getMusic(final MusicMessage musicMessage){
+
+         mWebView = new BridgeWebView(this);
+        mWebView.loadUrl(musicMessage.getSrc());
+        mWebView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                if(consoleMessage.message().contains(".mp3")){
+                    String s = consoleMessage.message().split("audio file '")[1];
+                    s = s.split("'.")[0];
+                    System.out.println(s);
+                }
+                return super.onConsoleMessage(consoleMessage);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+
     }
 }

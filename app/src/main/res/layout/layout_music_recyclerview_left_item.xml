@@ -5,7 +5,9 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
-    android:layout_marginLeft="10dp"
+    android:paddingLeft="10dp"
+    android:id="@+id/framelayout"
+    android:background="@drawable/bg_recycyler_left_item"
     >
 
     <ImageView

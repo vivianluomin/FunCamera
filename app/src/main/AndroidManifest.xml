@@ -22,7 +22,6 @@
             android:name=".MainActivity"
             android:hardwareAccelerated="false">
 
-
         </activity>
         <activity android:name=".RecordVideo.Views.RecordActivtiy"></activity>
         <activity android:name=".Base.BaseActivity" />
@@ -30,11 +29,13 @@
             android:name=".Base.SplashActivity"
             android:theme="@style/SplashTheme"></activity>
         <activity android:name=".music.AllMusicActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
 
         </activity>
     </application>

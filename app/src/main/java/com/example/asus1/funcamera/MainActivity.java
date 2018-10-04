@@ -2,9 +2,11 @@ package com.example.asus1.funcamera;
 
 import android.media.MediaPlayer;
 import android.net.http.SslError;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.webkit.ConsoleMessage;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -50,6 +52,19 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mWebView = (BridgeWebView)findViewById(R.id.web_view);
-        mWebView.loadUrl("http://www.kugou.com/yy/rank/home/1-6666.html?from=rank");
+        mWebView.loadUrl("http://www.kugou.com/song/q84gx62.html");
+        mWebView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                if(consoleMessage.message().contains(".mp3")){
+                    String s = consoleMessage.message().split("audio file '")[1];
+                    s = s.split("'.")[0];
+                    System.out.println(s);
+                }
+                return super.onConsoleMessage(consoleMessage);
+            }
+
+
+        });
     }
 }

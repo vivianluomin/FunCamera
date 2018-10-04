@@ -1,5 +1,7 @@
 package com.example.asus1.funcamera;
 
+import android.util.Log;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -7,56 +9,45 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class Test {
 
     private static String mUrl = "http://www.kugou.com/yy/rank/home/1-6666.html?from=rank";
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Document document = Jsoup.connect(mUrl).get();
+                    Document document = Jsoup.connect("http://www.kugou.com/song/qb6iy13.html")
+                            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36")
+                            .header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+                            .header("Accept-Encoding","gzip, deflate")
+                            .header("Cache-Control","max-age=0")
+                            .header("Connection","keep-alive")
+                            .header("Host","www.kugou.com")
+                            .followRedirects(true)
+                            .get();
                     Element body = document.body();
-
-                    Element content = body.getElementsByClass("pc_temp_wrap").first();
-
-                    // Elements elements = content.children().first().children();
-
-                    Element left = content.getElementsByClass("pc_temp_main").first();
-                    Element center = left.getElementsByClass("pc_temp_content").first();
-                    left = left.getElementsByClass("pc_temp_side").first();
-                    left = left.getElementsByClass("pc_rank_sidebar").first();
-                    Elements lis = left.getElementsByTag("li");
-                    for(Element li:lis){
-                       Element element = li.getElementsByTag("a").first();
-                       String title = element.attr("title");
-                       String src = element.attr("href");
-                       Element span = element.getElementsByTag("span").first();
-                       String icon = span.attr("style");
-                       icon = icon.split("src='")[1];
-                       icon = icon.split("',")[0];
-
-                    }
-
-                    center = center.getElementsByClass("pc_temp_container").first();
-                    center = center.getElementById("rankWrap");
-                    center = center.getElementsByClass("pc_temp_songlist").first();
-                    Elements clis = center.getElementsByTag("li");
-                    for(Element li:clis){
-                        String title = li.attr("title");
-                        String src = li.getElementsByTag("a").attr("href");
-                        String time = li.getElementsByClass("pc_temp_time").text();
-                        System.out.println(title+"----"+src+"----"+time);
-
-                    }
-
+                    System.out.println(body.html());
+                    Element mainPage = body.getElementsByClass("mainPage").first();
+                    Element audio = mainPage.getElementById("myAudio");
+                    System.out.println(audio.toString());
+                    String src = audio.attr("src");
+                    System.out.println(src);
                 }catch (IOException e){
                     e.printStackTrace();
                 }
-
             }
-
         }).start();
+
+
     }
 }
+
+
