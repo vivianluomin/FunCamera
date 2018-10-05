@@ -9,6 +9,7 @@ public class ChangeMessage {
     public ChangeMessage(String src,String title) {
         this.src = src;
         this.title = title;
+
     }
 
     public String getSrc() {
@@ -26,4 +27,6 @@ public class ChangeMessage {
     public void setTitle(String title) {
         this.title = title;
     }
+
+
 }

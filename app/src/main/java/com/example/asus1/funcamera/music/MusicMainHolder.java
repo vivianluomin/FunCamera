@@ -27,7 +27,8 @@ public class MusicMainHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View v) {
                 if(mData!=null){
-                    EventBus.getDefault().post(new MusicMessage(mData.getmSrc()));
+                    EventBus.getDefault().post(new MusicMessage(mData.getmSrc()
+                            ,mData.getmTime(),mData.getmTitle()));
                 }
 
             }

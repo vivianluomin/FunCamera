@@ -1,6 +1,11 @@
 package com.example.asus1.funcamera.music;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -8,12 +13,14 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
@@ -28,10 +35,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class AllMusicActivity extends BaseActivity implements Handler.Callback{
+public class AllMusicActivity extends BaseActivity implements Handler.Callback,
+        View.OnClickListener,MusicBinder.playControllerListener{
 
     private RecyclerView mRecyclerView;
     private RecyclerView mRecyclerViewLeft;
@@ -48,8 +60,16 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
     private final int MSG_PLAY = 300;
 
     BridgeWebView mWebView;
-
+    private MusicBinder mBinder;
+    private MusicConnection mConnection;
+    private RelativeLayout mBottom;
+    private ImageView mPlayController;
+    private TextView mUseMusic;
+    private TextView mstartTime;
+    private TextView mEndTime;
+    private TextView mMusicName;
     private String mUrl = "http://www.kugou.com/yy/rank/home/1-6666.html?from=rank";
+    private String mCurrntMusic = "";
 
     private static final String TAG = "AllMusicActivity";
 
@@ -66,6 +86,7 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
         mRecyclerViewLeft = (RecyclerView)findViewById(R.id.recycler_view_left);
         mClose = (ImageView)findViewById(R.id.iv_close);
+        mClose.setOnClickListener(this);
         mTitle = (TextView)findViewById(R.id.tv_title);
         mLeftAdapter = new MusicLeftRecyclerAdapter(this,mLeftData);
         mMainAdapter = new MusicMainRecyclerAdapter(this,mMainData);
@@ -73,7 +94,20 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
         mRecyclerView.setAdapter(mMainAdapter);
         mRecyclerViewLeft.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerViewLeft.setAdapter(mLeftAdapter);
+        mBottom = (RelativeLayout)findViewById(R.id.relative_bottom);
+        mMusicName = (TextView)findViewById(R.id.tv_music_name);
+        mPlayController = (ImageView)findViewById(R.id.iv_control);
+        mPlayController.setOnClickListener(this);
+        mstartTime = (TextView)findViewById(R.id.tv_start_time);
+        mEndTime = (TextView)findViewById(R.id.tv_end_time);
+        mUseMusic = (TextView)findViewById(R.id.tv_use);
+        mUseMusic.setOnClickListener(this);
+        mConnection = new MusicConnection();
+        Intent intent = new Intent(this,MusicService.class);
+        bindService(intent,mConnection,BIND_AUTO_CREATE);
         initData();
+
+
     }
 
     private void initData(){
@@ -127,11 +161,32 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
                 mMainAdapter.notifyDataSetChanged();
                 break;
             case MSG_PLAY:
-                String ulr = (String)msg.obj;
+                Bundle bundle = msg.getData();
+                String ulr = bundle.getString("src");
+                String time = bundle.getString("time");
+                mMusicName.setText(bundle.getString("name"));
+                mCurrntMusic =ulr;
+                play(ulr,time);
+                break;
+
 
         }
 
         return false;
+    }
+
+    private void play(final String url,String time){
+
+            mBottom.setVisibility(View.VISIBLE);
+            mEndTime.setText(time);
+            String[] tis = time.split(":");
+            int ti = Integer.parseInt(tis[0])*60+Integer.parseInt(tis[1]);
+            ti = ti*1000;
+            int half = ti/2/1000;
+            String half_time = String.valueOf(half/60)+":"+String.valueOf(half%60);
+            mstartTime.setText(half_time);
+            mBinder.prepareMediaPlayer(url,ti);
+
     }
 
     private Element connect(String url){
@@ -226,22 +281,77 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
                 if(consoleMessage.message().contains(".mp3")){
                     String s = consoleMessage.message().split("audio file '")[1];
                     s = s.split("'.")[0];
-                    mHandler.obtainMessage(MSG_PLAY,s).sendToTarget();
+                    Message message = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("src",s);
+                    bundle.putString("time",musicMessage.getmTime());
+                    bundle.putString("name",musicMessage.getmName());
+                    message.setData(bundle);
+                    message.what = MSG_PLAY;
+                    mHandler.sendMessage(message);
                 }
                 return super.onConsoleMessage(consoleMessage);
             }
 
         });
 
-
-
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.iv_control:
+                if(mBinder.isPlaying()){
+                    mBinder.pauseMusic();
+                }else {
+                    mBinder.playMusic();
+                }
+                break;
+            case R.id.tv_use:
+                if(!mCurrntMusic.equals("")){
+                    Intent intent = new Intent();
+                    intent.putExtra("music",mCurrntMusic);
+                    setResult(RESULT_OK,intent);
+                    finish();
+                }
+                break;
+
+            case R.id.iv_close:
+                finish();
+                break;
+        }
+    }
+
+    @Override
+    public void playing() {
+        mPlayController.setImageResource(R.mipmap.ic_pause);
+    }
+
+    @Override
+    public void pausiong() {
+        mPlayController.setImageResource(R.mipmap.ic_play);
+    }
 
     @Override
     protected void onDestroy() {
         EventBus.getDefault().unregister(this);
+        mBinder.stopMusic();
+        unbindService(mConnection);
         super.onDestroy();
 
+    }
+
+    private class MusicConnection implements ServiceConnection{
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBinder = (MusicBinder) service;
+            Log.d(TAG, "onServiceConnected: ");
+            mBinder.setController(AllMusicActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
     }
 }
