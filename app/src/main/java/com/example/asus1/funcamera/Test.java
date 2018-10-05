@@ -24,28 +24,23 @@ public class Test {
             @Override
             public void run() {
                 try {
-                    Document document = Jsoup.connect("http://www.kugou.com/song/qb6iy13.html")
-                            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36")
-                            .header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                            .header("Accept-Encoding","gzip, deflate")
-                            .header("Cache-Control","max-age=0")
-                            .header("Connection","keep-alive")
-                            .header("Host","www.kugou.com")
-                            .followRedirects(true)
+                    Document document = Jsoup.connect("http://www.kugou.com/song/dxf244a.html")
                             .get();
                     Element body = document.body();
                     System.out.println(body.html());
                     Element mainPage = body.getElementsByClass("mainPage").first();
-                    Element audio = mainPage.getElementById("myAudio");
-                    System.out.println(audio.toString());
-                    String src = audio.attr("src");
-                    System.out.println(src);
+                    Element album = mainPage.getElementsByClass("content").first()
+                            .getElementsByClass("singerContent").first();
+                    System.out.println(album.html());
+//                    Element image = album.getElementsByTag("a").first()
+//                            .getElementsByTag("img").first();
+//                    String album_image = image.attr("src");
+//                    System.out.println(album_image);
                 }catch (IOException e){
                     e.printStackTrace();
                 }
             }
         }).start();
-
 
     }
 }

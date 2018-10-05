@@ -2,6 +2,7 @@ package com.example.asus1.funcamera.music;
 
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -122,6 +126,9 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
                 mTitle.setText(string);
                 mMainAdapter.notifyDataSetChanged();
                 break;
+            case MSG_PLAY:
+                String ulr = (String)msg.obj;
+
         }
 
         return false;
@@ -219,13 +226,17 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback{
                 if(consoleMessage.message().contains(".mp3")){
                     String s = consoleMessage.message().split("audio file '")[1];
                     s = s.split("'.")[0];
-                    System.out.println(s);
+                    mHandler.obtainMessage(MSG_PLAY,s).sendToTarget();
                 }
                 return super.onConsoleMessage(consoleMessage);
             }
+
         });
 
+
+
     }
+
 
     @Override
     protected void onDestroy() {

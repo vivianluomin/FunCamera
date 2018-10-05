@@ -42,7 +42,8 @@
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:id="@+id/recycler_view"
             android:paddingLeft="16dp"
             android:paddingTop="16dp"
@@ -51,6 +52,97 @@
 
 
         </android.support.v7.widget.RecyclerView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:paddingLeft="16dp"
+            android:visibility="gone"
+            android:id="@+id/relative_bottom"
+            >
+
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignParentBottom="true"
+                android:src="@mipmap/bg_music"
+                android:id="@+id/iv_music_cover"
+                android:scaleType="centerCrop"
+                android:layout_marginBottom="6dp"
+                />
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:id="@+id/iv_control"
+                android:layout_alignParentBottom="true"
+                android:src="@mipmap/ic_play"
+                android:scaleType="center"
+                android:layout_marginBottom="6dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_music_name"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:text="时光"
+                android:padding="4dp"
+                />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_start_time"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:layout_toEndOf="@id/iv_music_cover"
+                android:layout_below="@id/tv_music_name"
+                android:text="2:30"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:id="@+id/tv_use"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="25dp"
+                android:layout_marginEnd="10dp"
+                android:gravity="center"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="@string/use"
+                android:background="@drawable/bg_text_use"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_end_time"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:layout_toStartOf="@id/tv_use"
+                android:layout_below="@id/tv_music_name"
+                android:text="2:30"
+                android:layout_marginRight="30dp"
+                />
+
+            <ImageView
+                android:layout_width="212dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="80dp"
+                android:layout_marginRight="50dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_yinpin" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
