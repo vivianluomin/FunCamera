@@ -1,42 +1,11 @@
 package com.example.asus1.funcamera;
 
-import android.media.MediaPlayer;
-import android.net.http.SslError;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.ConsoleMessage;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
-import com.example.asus1.funcamera.Utils.Constant;
-import com.example.asus1.funcamera.Utils.JSSecretWebView;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
-import com.github.lzyzsd.jsbridge.CallBackFunction;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class MainActivity extends BaseActivity {
 

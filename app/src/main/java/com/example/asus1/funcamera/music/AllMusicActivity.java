@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
+import com.example.asus1.funcamera.Utils.Util;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -177,11 +178,10 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback,
 
     private void play(final String url,String time){
 
+
             mBottom.setVisibility(View.VISIBLE);
             mEndTime.setText(time);
-            String[] tis = time.split(":");
-            int ti = Integer.parseInt(tis[0])*60+Integer.parseInt(tis[1]);
-            ti = ti*1000;
+            int ti = Util.getMS(time);
             int half = ti/2/1000;
             String half_time = String.valueOf(half/60)+":"+String.valueOf(half%60);
             mstartTime.setText(half_time);
@@ -311,6 +311,7 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback,
                 if(!mCurrntMusic.equals("")){
                     Intent intent = new Intent();
                     intent.putExtra("music",mCurrntMusic);
+                    intent.putExtra("time",Util.getMS(mEndTime.getText().toString()));
                     setResult(RESULT_OK,intent);
                     finish();
                 }
@@ -337,6 +338,7 @@ public class AllMusicActivity extends BaseActivity implements Handler.Callback,
         EventBus.getDefault().unregister(this);
         mBinder.stopMusic();
         unbindService(mConnection);
+        stopService(new Intent(this,MusicService.class));
         super.onDestroy();
 
     }

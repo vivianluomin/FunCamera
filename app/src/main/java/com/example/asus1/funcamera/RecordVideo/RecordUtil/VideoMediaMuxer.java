@@ -60,7 +60,7 @@ public class VideoMediaMuxer implements ModelController {
     }
 
     @Override
-    public void startRecording(){
+    public void startRecording(int input){
             //开始录制
             mVideoEncode = new
                     VideoRecordEncode(this,lisnter,1280, 720);
@@ -69,7 +69,7 @@ public class VideoMediaMuxer implements ModelController {
             this.addEncode(mVideoEncode,mAudioEndoe);
             this.preprare();
         mVideoEncode.startRecord();
-        mAudioEndoe.startRecording();
+        mAudioEndoe.startRecording(input);
     }
 
     private  onFramPrepareLisnter lisnter = new onFramPrepareLisnter() {

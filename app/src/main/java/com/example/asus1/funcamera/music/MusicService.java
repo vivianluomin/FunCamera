@@ -33,6 +33,7 @@ public class MusicService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+
         mBinder = new MusicBinder();
         Log.d(TAG, "onBind: ");
         return mBinder;

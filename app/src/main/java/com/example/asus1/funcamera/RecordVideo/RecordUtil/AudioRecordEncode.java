@@ -37,7 +37,7 @@ public class AudioRecordEncode implements Runnable {
     private int mRuqestDrain = 0;
     private Object mSyn  = new Object();
 
-    private AudioThread mAudioThread;
+    public AudioThread mAudioThread;
 
     private MediaCodec mCodec;
     private VideoMediaMuxer mMuxer;
@@ -82,11 +82,12 @@ public class AudioRecordEncode implements Runnable {
 
     }
 
-    public void startRecording(){
+    public void startRecording(int input){
         synchronized (mSyn){
             mIsCapturing = true;
             mRuestStop = false;
             mAudioThread = new AudioThread();
+            mAudioThread.setAudioInput(input);
             mAudioThread.start();
 
             mSyn.notifyAll();
@@ -236,12 +237,16 @@ public class AudioRecordEncode implements Runnable {
         }
     }
 
-    private class AudioThread extends Thread{
+    public class AudioThread extends Thread{
 
         //音频源
-        private static final int AUDIO_INPUT = MediaRecorder.AudioSource.MIC;
+        private  int AUDIO_INPUT = MediaRecorder.AudioSource.MIC;
         // 录音对象
         private AudioRecord mAudioRecord;
+
+        public void setAudioInput(int input){
+            AUDIO_INPUT = input;
+        }
 
         @Override
         public void run() {

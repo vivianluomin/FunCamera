@@ -25,11 +25,11 @@ public class RecordPersenter {
     public void setModeController(ModelController modeController){
         mModelController = modeController;
     }
-    public void startRecoding(){
+    public void startRecoding(int input){
         try {
             VideoMediaMuxer muxer = new VideoMediaMuxer();
             if(mModelController!=null)
-                mModelController.startRecording();
+                mModelController.startRecording(input);
         }catch (IOException e){
             e.printStackTrace();
         }

@@ -2,10 +2,12 @@ package com.example.asus1.funcamera.music;
 
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.util.Log;
 
 import java.io.IOException;
 
 public class MusicBinder extends Binder {
+    private static final String TAG = "MusicBinder";
 
     private String mUrl;
     private MediaPlayer mMediaPlayer = new MediaPlayer();
@@ -49,6 +51,7 @@ public class MusicBinder extends Binder {
    }
 
     public void playMusic(){
+        Log.d(TAG, "playMusic: "+Thread.currentThread());
         if(!mMediaPlayer.isPlaying()){
             mMediaPlayer.start();
             mListener.playing();
