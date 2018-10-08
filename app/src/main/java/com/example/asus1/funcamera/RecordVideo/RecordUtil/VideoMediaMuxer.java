@@ -20,7 +20,7 @@ public class VideoMediaMuxer implements ModelController {
 
     private static final String DIR_NAME = "FunCamera";
     private static final SimpleDateFormat mDateTimeForamt =
-            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
+            new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
     private static String EXT= ".mp4";
 
     private String mOutputPath;

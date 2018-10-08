@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.asus1.funcamera.Base.Base2Activity;
 import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.Utils.Util;
@@ -43,7 +44,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class AllMusicActivity extends BaseActivity implements Handler.Callback,
+public class AllMusicActivity extends Base2Activity implements Handler.Callback,
         View.OnClickListener,MusicBinder.playControllerListener{
 
     private RecyclerView mRecyclerView;

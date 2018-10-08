@@ -28,6 +28,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     private RecordView mRecordView;
     private ImageView mMusic;
     private ImageView mBeauty;
+    private ImageView mSee;
     private boolean mRecord = false;
     private RecordPersenter mPresenter = RecordPersenter.getPresenterInstantce();
 
@@ -56,6 +57,8 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mMusic.setOnClickListener(this);
         mBeauty = (ImageView)findViewById(R.id.iv_filter);
         mBeauty.setOnClickListener(this);
+        mSee =(ImageView)findViewById(R.id.iv_see);
+        mSee.setOnClickListener(this);
     }
 
     @Override
@@ -85,6 +88,8 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.iv_filter:
                 break;
+            case R.id.iv_see:
+
                 
         }
         

@@ -3,4 +3,5 @@
 
     <string name="requestPermission">您拒绝了访问权限</string>
     <string name="use">使用</string>
+    <string name="my_work">我的作品</string>
 </resources>

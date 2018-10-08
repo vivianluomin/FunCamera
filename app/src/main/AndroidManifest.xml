@@ -6,8 +6,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
-
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
 
     <meta-data
         android:name="android.webkit.WebView.EnableSafeBrowsing"
@@ -22,28 +21,23 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:hardwareAccelerated="false">
-
-        </activity>
-        <activity android:name=".RecordVideo.Views.RecordActivtiy"></activity>
+            android:hardwareAccelerated="false"></activity>
+        <activity android:name=".RecordVideo.Views.RecordActivtiy" />
         <activity android:name=".Base.BaseActivity" />
         <activity
             android:name=".Base.SplashActivity"
             android:theme="@style/SplashTheme">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-        <activity android:name=".music.AllMusicActivity">
+        <activity android:name=".music.AllMusicActivity"></activity>
 
+        <service android:name=".music.MusicService" />
 
-        </activity>
-
-        <service android:name=".music.MusicService"/>
+        <activity android:name=".Video.AllVideoActivity"></activity>
     </application>
 
 </manifest>
