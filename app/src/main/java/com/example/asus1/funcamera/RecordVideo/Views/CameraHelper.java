@@ -138,6 +138,7 @@ public class CameraHelper implements Runnable {
            mPreviewBuilder =  mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewBuilder.addTarget(mSurface);
 
+
             //进行相机预览
             mCameraDevice.createCaptureSession(surfaces,mStateCallbackSession,null);
 
@@ -155,6 +156,8 @@ public class CameraHelper implements Runnable {
 
             mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            mPreviewBuilder.set(CaptureRequest.CONTROL_SCENE_MODE,
+                    CaptureRequest.CONTROL_SCENE_MODE_PORTRAIT);
             try {
                 //发送请求
                 session.setRepeatingRequest(mPreviewBuilder.build(),

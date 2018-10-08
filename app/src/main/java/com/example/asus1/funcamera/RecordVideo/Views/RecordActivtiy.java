@@ -16,6 +16,7 @@ import com.example.asus1.funcamera.RecordVideo.RecordUtil.AudioRecordEncode;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoMediaMuxer;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.onFramPrepareLisnter;
+import com.example.asus1.funcamera.Video.AllVideoActivity;
 import com.example.asus1.funcamera.music.AllMusicActivity;
 
 import java.io.IOException;
@@ -89,6 +90,10 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
             case R.id.iv_filter:
                 break;
             case R.id.iv_see:
+                Intent intent1 = new Intent(RecordActivtiy.this,
+                        AllVideoActivity.class);
+                startActivity(intent1);
+                break;
 
                 
         }
