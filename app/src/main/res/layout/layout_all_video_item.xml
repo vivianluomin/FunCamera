@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:id="@+id/iv_video_cover"
         android:src="@mipmap/ic_noneimage"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:background="@color/gray_300"
         />
 

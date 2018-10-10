@@ -11,6 +11,7 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.media.ExifInterface;
 import android.opengl.EGLSurface;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
@@ -61,7 +63,7 @@ public class CameraHelper implements Runnable {
 
         //设置图像像素比位4:3
         surfaceTexture.
-                setDefaultBufferSize(4*screenWidth/3,3 * screenWidth / 4);
+                setDefaultBufferSize(16*screenWidth/9,9 * screenWidth / 16);
         mSurface = new Surface(surfaceTexture);
 
     }
@@ -135,7 +137,8 @@ public class CameraHelper implements Runnable {
         surfaces.add(mSurface);
         try {
             //设置一个具有输出Surface的CaptureRequest.Builder
-           mPreviewBuilder =  mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+           mPreviewBuilder =  mCameraDevice.
+                   createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewBuilder.addTarget(mSurface);
 
 
@@ -156,8 +159,10 @@ public class CameraHelper implements Runnable {
 
             mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-            mPreviewBuilder.set(CaptureRequest.CONTROL_SCENE_MODE,
-                    CaptureRequest.CONTROL_SCENE_MODE_PORTRAIT);
+            mPreviewBuilder.set(CaptureRequest.JPEG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90);
+            mPreviewBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE,CaptureRequest.NOISE_REDUCTION_MODE_FAST);
+            mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                    CaptureRequest.CONTROL_AF_MODE_AUTO);
             try {
                 //发送请求
                 session.setRepeatingRequest(mPreviewBuilder.build(),

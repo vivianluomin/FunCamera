@@ -152,7 +152,7 @@
         android:layout_height="match_parent"
         android:id="@+id/recycler_view_left"
         android:layout_gravity = "left"
-        android:background="#B4CDCD"
+        android:background="@color/second_color"
         android:paddingLeft="16dp"
         android:padding="10dp"
         >

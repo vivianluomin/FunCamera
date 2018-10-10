@@ -14,4 +14,5 @@
     <color name="main_black">#212121</color>
     <color name="click_color">#e0e0e0</color>
     <color name="second_color">#616161</color>
+    <color name="transparent_white">#AAFFFFFF</color>
 </resources>

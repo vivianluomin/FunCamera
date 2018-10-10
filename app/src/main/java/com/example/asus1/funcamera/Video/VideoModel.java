@@ -1,8 +1,10 @@
 package com.example.asus1.funcamera.Video;
 
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 
 import org.jsoup.SerializationException;
 
@@ -10,6 +12,7 @@ public class VideoModel implements Parcelable{
 
     private String mSrc;
     private String mTime;
+    private Bitmap bitmap;
 
     public static Parcelable.Creator<VideoModel> CREATOR = new Parcelable.Creator<VideoModel>(){
 
@@ -34,6 +37,8 @@ public class VideoModel implements Parcelable{
     public VideoModel( String mSrc, String mTime) {
         this.mSrc = mSrc;
         this.mTime = mTime;
+        bitmap = ThumbnailUtils.createVideoThumbnail(mSrc, MediaStore.Images.
+                Thumbnails.MINI_KIND);
     }
 
 
@@ -51,6 +56,14 @@ public class VideoModel implements Parcelable{
 
     public void setmTime(String mTime) {
         this.mTime = mTime;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     @Override

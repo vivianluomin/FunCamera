@@ -21,7 +21,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:hardwareAccelerated="false"></activity>
+            android:hardwareAccelerated="false" />
         <activity android:name=".RecordVideo.Views.RecordActivtiy" />
         <activity android:name=".Base.BaseActivity" />
         <activity
@@ -33,11 +33,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".music.AllMusicActivity"></activity>
+        <activity android:name=".music.AllMusicActivity" />
 
         <service android:name=".music.MusicService" />
 
-        <activity android:name=".Video.AllVideoActivity"></activity>
+        <activity android:name=".Video.AllVideoActivity" />
+        <activity android:name=".Video.PlayVideoActivity"></activity>
     </application>
 
 </manifest>

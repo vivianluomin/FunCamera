@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Video.PlayVideoActivity">
+
+
+    <com.example.asus1.funcamera.Video.PlayVideoView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/video_view"
+        >
+
+    </com.example.asus1.funcamera.Video.PlayVideoView>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/iv_close"
+        android:src="@mipmap/ic_close"
+        android:layout_marginTop="30dp"
+        android:scaleType="center"
+        />
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/iv_pause"
+        android:src="@mipmap/ic_video_pause"
+        android:scaleType="centerCrop"
+        android:layout_gravity="center"
+        android:alpha="0.5"
+        />
+
+</FrameLayout>
