@@ -9,6 +9,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+
     }
     buildTypes {
         release {
@@ -16,7 +18,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
+
+    sourceSets{
+        main{
+            jniLibs.srcDirs = ['src/main/libs']
+            jni.srcDirs=[]
+        }
+    }
+
 }
+
 
 repositories {
 
