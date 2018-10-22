@@ -17,18 +17,18 @@ import java.nio.ByteOrder;
 
 public class AudioRecordEncode implements Runnable {
 
-    private static final int BIT_RATE = 64000;
+    public static final int BIT_RATE = 64000;
     public static final int SAMPLES_PER_FRAME = 1024; //ACC，bytes/frame/channel
     public static final int FRAME_PER_BUFFER = 25; //ACC,frame/buffer/sec
-    private static final String MIME_TYPE = "audio/mp4a-latm";
+    public static final String MIME_TYPE = "audio/mp4a-latm";
     // 采样率
     // 44100是目前的标准，但是某些设备仍然支持22050，16000，11025
     // 采样频率一般共分为22.05KHz、44.1KHz、48KHz三个等级
-    private final static int AUDIO_SAMPLE_RATE = 44100;
+    public final static int AUDIO_SAMPLE_RATE = 44100;
     // 音频通道 单声道
-    private final static int AUDIO_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
+    public final static int AUDIO_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     // 音频格式：PCM编码
-    private final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+    public final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
     private boolean mIsCapturing = false;
     private boolean mEOS = false;
@@ -89,7 +89,6 @@ public class AudioRecordEncode implements Runnable {
             mAudioThread = new AudioThread();
             mAudioThread.setAudioInput(input);
             mAudioThread.start();
-
             mSyn.notifyAll();
 
         }

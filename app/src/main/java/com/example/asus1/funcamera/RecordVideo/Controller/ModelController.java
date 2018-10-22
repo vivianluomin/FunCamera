@@ -4,5 +4,6 @@ public interface ModelController {
 
     void startRecording(int input);
     void stopRecording();
+    String getVideoPath();
 
 }

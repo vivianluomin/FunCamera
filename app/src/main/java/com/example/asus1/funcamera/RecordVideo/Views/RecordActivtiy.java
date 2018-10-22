@@ -13,12 +13,14 @@ import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.RecordVideo.Controller.RecordPersenter;
 import com.example.asus1.funcamera.RecordVideo.Controller.ViewController;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.AudioRecordEncode;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.SlipteVideo;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoMediaMuxer;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.onFramPrepareLisnter;
 import com.example.asus1.funcamera.Video.AllVideoActivity;
 import com.example.asus1.funcamera.music.AllMusicActivity;
 
+import java.io.File;
 import java.io.IOException;
 
 public class RecordActivtiy extends BaseActivity implements View.OnClickListener
@@ -37,6 +39,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     private String mMusic_Url = "";
     private int mTime = 0;
     private MusicPlayerThread mMusicThread;
+    private String mVideoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +93,14 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
             case R.id.iv_filter:
                 break;
             case R.id.iv_see:
+                if(mMusic_Url!=null&&!mMusic_Url.equals("")){
+                    String path = SlipteVideo.slitpeVideo(mVideoPath,mMusic_Url,0);
+                    if(path!=null){
+                        File file = new File(mVideoPath);
+                        file.delete();
+                    }
+                }
+
                 Intent intent1 = new Intent(RecordActivtiy.this,
                         AllVideoActivity.class);
                 startActivity(intent1);
@@ -157,6 +168,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         Log.d(TAG, "startRecording: ");
         mPresenter.startRecoding(input);
         startRecordUI();
+        mVideoPath = mPresenter.getVideoPath();
     }
 
     @Override

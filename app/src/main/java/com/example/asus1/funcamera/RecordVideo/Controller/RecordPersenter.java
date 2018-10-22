@@ -40,6 +40,10 @@ public class RecordPersenter {
         mModelController.stopRecording();
     }
 
+    public String getVideoPath(){
+        return mModelController.getVideoPath();
+    }
+
     public void setVideoEncode(VideoRecordEncode encode){
         mViewController.setVideoEncode(encode);
     }

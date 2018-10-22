@@ -42,7 +42,11 @@ public class VideoMediaMuxer implements ModelController {
         mPresenter.setModeController(this);
     }
 
-    public void addEncode(VideoRecordEncode videoRecordEncode,AudioRecordEncode audioRecordEncode){
+    public String getOutputPath() {
+        return mOutputPath;
+    }
+
+    public void addEncode(VideoRecordEncode videoRecordEncode, AudioRecordEncode audioRecordEncode){
         mVideoEncode = videoRecordEncode;
         mAudioEndoe = audioRecordEncode;
         mEncodeCount = 2;
@@ -57,6 +61,11 @@ public class VideoMediaMuxer implements ModelController {
         //MediaCodec初始化
         mVideoEncode.prepare();
         mAudioEndoe.onPerpare();
+    }
+
+    @Override
+    public String getVideoPath() {
+        return mOutputPath;
     }
 
     @Override
