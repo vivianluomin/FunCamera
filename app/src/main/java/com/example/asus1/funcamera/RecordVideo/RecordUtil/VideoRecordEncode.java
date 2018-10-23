@@ -16,9 +16,9 @@ import java.nio.ByteBuffer;
 public class VideoRecordEncode implements Runnable {
 
     private MediaCodec mViedeoEncode;
-    private final  String MIME_TYPE = "video/avc";
-    private static final int FRAME_RATE = 25;
-    private static final float BPP = 0.25f;
+    public static final  String MIME_TYPE = "video/avc";
+    public static final int FRAME_RATE = 25;
+    public static final float BPP = 0.25f;
     private Surface mSurface;
 
     private static final String TAG = "VideoRecordEncode";
@@ -169,7 +169,7 @@ public class VideoRecordEncode implements Runnable {
         }
     }
 
-    private void drain(){
+    private void  drain(){
         int count = 0;
  LOOP:       while (mIsCaturing){
             int encodeStatue = mViedeoEncode.

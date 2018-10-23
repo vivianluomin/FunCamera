@@ -94,7 +94,8 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.iv_see:
                 if(mMusic_Url!=null&&!mMusic_Url.equals("")){
-                    String path = SlipteVideo.slitpeVideo(mVideoPath,mMusic_Url,0);
+                    String path = SlipteVideo.slitpeVideo(mVideoPath,mMusic_Url,
+                            mTime);
                     if(path!=null){
                         File file = new File(mVideoPath);
                         file.delete();
