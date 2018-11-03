@@ -17,7 +17,7 @@ public class VideoRecordEncode implements Runnable {
 
     private MediaCodec mViedeoEncode;
     public static final  String MIME_TYPE = "video/avc";
-    public static final int FRAME_RATE = 25;
+    public static final int FRAME_RATE = 25; //帧率
     public static final float BPP = 0.25f;
     private Surface mSurface;
 
@@ -67,8 +67,8 @@ public class VideoRecordEncode implements Runnable {
             mEnOS = false;
             mViedeoEncode = MediaCodec.createEncoderByType(MIME_TYPE);
             MediaFormat format =  MediaFormat.createVideoFormat(MIME_TYPE,mWidth,mHeight);
-            format.setInteger(MediaFormat.KEY_BIT_RATE,calcBitRate());
-            format.setInteger(MediaFormat.KEY_FRAME_RATE,FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_BIT_RATE,calcBitRate());//码率
+            format.setInteger(MediaFormat.KEY_FRAME_RATE,FRAME_RATE);//帧率
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL,10);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                     MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);

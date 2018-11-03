@@ -1,9 +1,12 @@
 package com.example.asus1.funcamera.RecordVideo.Views;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,19 +15,15 @@ import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.RecordVideo.Controller.RecordPersenter;
 import com.example.asus1.funcamera.RecordVideo.Controller.ViewController;
-import com.example.asus1.funcamera.RecordVideo.RecordUtil.AudioRecordEncode;
-import com.example.asus1.funcamera.RecordVideo.RecordUtil.SlipteVideo;
-import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoMediaMuxer;
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.SplitVideoThread;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
-import com.example.asus1.funcamera.RecordVideo.RecordUtil.onFramPrepareLisnter;
 import com.example.asus1.funcamera.Video.AllVideoActivity;
 import com.example.asus1.funcamera.music.AllMusicActivity;
 
 import java.io.File;
-import java.io.IOException;
 
 public class RecordActivtiy extends BaseActivity implements View.OnClickListener
-        ,ViewController,MusicPlayerThread.MusicPlayLinstener{
+        ,ViewController,MusicPlayerThread.MusicPlayLinstener,Handler.Callback{
 
     private static final String TAG = "RecordActivtiy";
     private RecordButtonView mRecordButtom;
@@ -40,6 +39,10 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     private int mTime = 0;
     private MusicPlayerThread mMusicThread;
     private String mVideoPath;
+
+    private Dialog mLoadingDoalog;
+
+    private Handler mMainHandler = new Handler(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,11 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mBeauty.setOnClickListener(this);
         mSee =(ImageView)findViewById(R.id.iv_see);
         mSee.setOnClickListener(this);
+        mLoadingDoalog = new AlertDialog.Builder(this)
+                .setMessage("请稍等")
+                .setTitle("合成中")
+                .create();
+
     }
 
     @Override
@@ -94,17 +102,16 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.iv_see:
                 if(mMusic_Url!=null&&!mMusic_Url.equals("")){
-                    String path = SlipteVideo.slitpeVideo(mVideoPath,mMusic_Url,
-                            mTime);
-                    if(path!=null){
-                        File file = new File(mVideoPath);
-                        file.delete();
-                    }
+                    mLoadingDoalog.show();
+                    new SplitVideoThread("vivian",mVideoPath,mMusic_Url
+                    ,mTime,mMainHandler).start();
+
+                }else {
+                    Intent intent1 = new Intent(RecordActivtiy.this,
+                            AllVideoActivity.class);
+                    startActivity(intent1);
                 }
 
-                Intent intent1 = new Intent(RecordActivtiy.this,
-                        AllVideoActivity.class);
-                startActivity(intent1);
                 break;
 
                 
@@ -172,6 +179,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mVideoPath = mPresenter.getVideoPath();
     }
 
+
     @Override
     public void stopRecording() {
         mPresenter.stopRecoding();
@@ -199,6 +207,26 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
     @Override
     public void compelte() {
 
+    }
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        mLoadingDoalog.dismiss();
+
+        if(msg.what == 1){
+            String path = (String) msg.obj;
+            if(path!=null){
+                File file = new File(mVideoPath);
+                file.delete();
+            }
+
+            Intent intent1 = new Intent(RecordActivtiy.this,
+                    AllVideoActivity.class);
+            startActivity(intent1);
+        }
+
+
+        return false;
     }
 
     @Override
