@@ -22,7 +22,10 @@
         <activity
             android:name=".MainActivity"
             android:hardwareAccelerated="false" />
-        <activity android:name=".RecordVideo.Views.RecordActivtiy" />
+        <activity android:name=".RecordVideo.Views.RecordActivtiy"
+            android:hardwareAccelerated="false"
+            >
+        </activity>
         <activity android:name=".Base.BaseActivity" />
         <activity
             android:name=".Base.SplashActivity"

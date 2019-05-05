@@ -66,12 +66,32 @@ public class VideoRecordEncode implements Runnable {
         try {
             mEnOS = false;
             mViedeoEncode = MediaCodec.createEncoderByType(MIME_TYPE);
-            MediaFormat format =  MediaFormat.createVideoFormat(MIME_TYPE,mWidth,mHeight);
+            MediaFormat format =  MediaFormat.createVideoFormat(MIME_TYPE,mHeight,mWidth);
             format.setInteger(MediaFormat.KEY_BIT_RATE,calcBitRate());//码率
             format.setInteger(MediaFormat.KEY_FRAME_RATE,FRAME_RATE);//帧率
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL,10);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                     MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+            MediaCodecInfo.CodecProfileLevel dstProfileLevel = null;
+            MediaCodecInfo.CodecCapabilities codecCapabilities = mViedeoEncode.getCodecInfo().getCapabilitiesForType(MIME_TYPE);
+            for(MediaCodecInfo.CodecProfileLevel profileLevel: codecCapabilities.profileLevels){
+                if(profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline){
+                    dstProfileLevel = profileLevel;
+                }else if(profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AVCProfileMain){
+                    if (dstProfileLevel.profile < MediaCodecInfo.CodecProfileLevel.AVCProfileMain) {
+                        dstProfileLevel = profileLevel;
+                    }
+                }else if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AVCProfileHigh) {
+                    if (dstProfileLevel.profile < MediaCodecInfo.CodecProfileLevel.AVCProfileHigh) {
+                        dstProfileLevel = profileLevel;
+                    }
+                }
+                if(dstProfileLevel.profile == MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline){
+                    break;
+                }
+            }
+            format.setInteger(MediaFormat.KEY_PROFILE,dstProfileLevel.profile);
+            format.setInteger(MediaFormat.KEY_LEVEL,dstProfileLevel.level);
             mViedeoEncode.configure(format,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
 
             //得到Surface用于编码
@@ -184,7 +204,7 @@ public class VideoRecordEncode implements Runnable {
                Log.d(TAG, "drain: "+encodeStatue);
 
                MediaFormat format = mViedeoEncode.getOutputFormat();
-               mTrackIndex = mMuxer.addTrack(format);
+               //mTrackIndex = mMuxer.addTrack(format);
                mMuxerStart = true;
                if(!mMuxer.start()){
                    synchronized (mMuxer){
@@ -205,7 +225,7 @@ public class VideoRecordEncode implements Runnable {
                ByteBuffer byteBuffer = mViedeoEncode.getOutputBuffer(encodeStatue);
                mBfferInfo.presentationTimeUs = getPTSUs();
                prevOutputPTSUs = mBfferInfo.presentationTimeUs;
-               mMuxer.writeSampleData(mTrackIndex,byteBuffer,mBfferInfo);
+               mMuxer.writeSampleData(0,byteBuffer,mBfferInfo);
                mViedeoEncode.releaseOutputBuffer(encodeStatue,false);
                if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                    // when EOS come.

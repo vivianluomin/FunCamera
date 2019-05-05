@@ -161,7 +161,7 @@ public class AudioRecordEncode implements Runnable {
                 Log.d(TAG, "drain: "+encodeStatue);
 
                 MediaFormat format = mCodec.getOutputFormat();
-                mTrackIndex = mMuxer.addTrack(format);
+                //mTrackIndex = mMuxer.addTrack(format);
                 mMuxerStart = true;
                 if(!mMuxer.start()){
                     synchronized (mMuxer){
@@ -182,7 +182,7 @@ public class AudioRecordEncode implements Runnable {
                 ByteBuffer byteBuffer = mCodec.getOutputBuffer(encodeStatue);
                 mBfferInfo.presentationTimeUs = getPTSUs();
                 prevOutputPTSUs = mBfferInfo.presentationTimeUs;
-                mMuxer.writeSampleData(mTrackIndex,byteBuffer,mBfferInfo);
+                mMuxer.writeSampleData(1,byteBuffer,mBfferInfo);
                 mCodec.releaseOutputBuffer(encodeStatue,false);
                 if ((mBfferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     // when EOS come.

@@ -2,6 +2,7 @@ package com.example.asus1.funcamera.RecordVideo.Views;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -25,6 +26,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
@@ -37,6 +39,7 @@ public class CameraHelper implements Runnable {
     private String mCameraId = null;
     private boolean mFlashSupport = false;
     private Surface mSurface;
+    private SurfaceTexture mSurfaceTexture;
     private CaptureRequest.Builder mPreviewBuilder;
     private Object mSyn = new Object();
 
@@ -64,6 +67,7 @@ public class CameraHelper implements Runnable {
         //设置图像像素比位4:3
         surfaceTexture.
                 setDefaultBufferSize(16*screenWidth/9,9 * screenWidth / 16);
+        mSurfaceTexture = surfaceTexture;
         mSurface = new Surface(surfaceTexture);
 
     }
@@ -102,6 +106,24 @@ public class CameraHelper implements Runnable {
             e.printStackTrace();
         }
 
+    }
+
+    private Camera initCamera1(){
+        Camera cam = null;
+        try {
+            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            int cameraCount = Camera.getNumberOfCameras();
+            Camera.getCameraInfo(1,cameraInfo);
+            cam = Camera.open(1);
+            cam.setPreviewTexture(mSurfaceTexture);
+            //cam.setDisplayOrientation(90);
+            cam.startPreview();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+        return cam;
     }
 
 
@@ -158,9 +180,9 @@ public class CameraHelper implements Runnable {
         public void onConfigured(@NonNull CameraCaptureSession session) {
 
             mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-            mPreviewBuilder.set(CaptureRequest.JPEG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90);
-            mPreviewBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE,CaptureRequest.NOISE_REDUCTION_MODE_FAST);
+                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+            //mPreviewBuilder.set(CaptureRequest.JPEG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90);
+            //mPreviewBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE,CaptureRequest.NOISE_REDUCTION_MODE_FAST);
             mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                     CaptureRequest.CONTROL_AF_MODE_AUTO);
             try {

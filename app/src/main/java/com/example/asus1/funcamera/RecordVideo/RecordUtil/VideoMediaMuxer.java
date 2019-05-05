@@ -19,9 +19,9 @@ import java.util.Locale;
 public class VideoMediaMuxer implements ModelController {
 
     public static final String DIR_NAME = "FunCamera";
-    private static final SimpleDateFormat mDateTimeForamt =
+    public static final SimpleDateFormat mDateTimeForamt =
             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
-    private static String EXT= ".mp4";
+    public static String EXT= ".mp4";
 
     private String mOutputPath;
     private MediaMuxer mMediaMuxer;
@@ -33,6 +33,8 @@ public class VideoMediaMuxer implements ModelController {
     private static final String TAG = "VideoMediaMuxer";
     private RecordPersenter mPresenter = RecordPersenter.getPresenterInstantce();
 
+    private FFmpegMuxer mFFmepgMuxer;
+
     public VideoMediaMuxer()throws IOException{
 
         mOutputPath = getCaptureFile(Environment.DIRECTORY_MOVIES,EXT).toString();
@@ -40,6 +42,8 @@ public class VideoMediaMuxer implements ModelController {
         mEncodeCount = 0;
         mStartEncodeCount = 0;
         mPresenter.setModeController(this);
+
+        mFFmepgMuxer = new FFmpegMuxer();
     }
 
     public String getOutputPath() {
@@ -99,7 +103,7 @@ public class VideoMediaMuxer implements ModelController {
         mStartEncodeCount++;
         Log.d(TAG, "start: "+mStartEncodeCount);
         if(mEncodeCount>0&&(mStartEncodeCount == mEncodeCount)){
-            mMediaMuxer.start();
+            //mMediaMuxer.start();
             mIsStart = true;
             notifyAll();
             return mIsStart;
@@ -114,8 +118,9 @@ public class VideoMediaMuxer implements ModelController {
    synchronized public void stop(){
          mStartEncodeCount -- ;
          if(mEncodeCount>0&&mStartEncodeCount<=0){
-             mMediaMuxer.stop();
-             mMediaMuxer.release();
+             //mMediaMuxer.stop();
+             //mMediaMuxer.release();
+             mFFmepgMuxer.stop();
              mIsStart = false;
          }
     }
@@ -123,7 +128,8 @@ public class VideoMediaMuxer implements ModelController {
     public void writeSampleData(int mediaTrack, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo){
         //写入文件
         if(mStartEncodeCount>0){
-            mMediaMuxer.writeSampleData(mediaTrack,byteBuffer,bufferInfo);
+            //mMediaMuxer.writeSampleData(mediaTrack,byteBuffer,bufferInfo);
+            mFFmepgMuxer.write(mediaTrack,byteBuffer,bufferInfo);
         }
 
     }
