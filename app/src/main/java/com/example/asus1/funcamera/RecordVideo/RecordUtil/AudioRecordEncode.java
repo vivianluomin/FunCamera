@@ -18,8 +18,7 @@ import java.nio.ByteOrder;
 public class AudioRecordEncode implements Runnable {
 
     public static final int BIT_RATE = 64000;
-    public static final int SAMPLES_PER_FRAME = 1024; //ACC，bytes/frame/channel
-    public static final int FRAME_PER_BUFFER = 25; //ACC,frame/buffer/sec
+    public static final int SAMPLES_PER_FRAME = 1024;
     public static final String MIME_TYPE = "audio/mp4a-latm";
     // 采样率
     // 44100是目前的标准，但是某些设备仍然支持22050，16000，11025

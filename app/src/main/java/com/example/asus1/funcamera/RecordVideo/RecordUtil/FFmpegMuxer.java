@@ -33,6 +33,10 @@ public class FFmpegMuxer {
         native_stop(mHandler);
     }
 
+    public void writeData(int mediaTrack, ByteBuffer data,long pts){
+
+    }
+
     private native long native_init(String path);
 
     private native void writeData(long handler,int mediaTrack, ByteBuffer data, MediaCodec.BufferInfo info);

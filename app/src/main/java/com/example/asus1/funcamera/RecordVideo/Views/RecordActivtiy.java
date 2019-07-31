@@ -15,6 +15,7 @@ import com.example.asus1.funcamera.Base.BaseActivity;
 import com.example.asus1.funcamera.R;
 import com.example.asus1.funcamera.RecordVideo.Controller.RecordPersenter;
 import com.example.asus1.funcamera.RecordVideo.Controller.ViewController;
+import com.example.asus1.funcamera.RecordVideo.Encoder.VideoEncoder;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.SplitVideoThread;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 import com.example.asus1.funcamera.Video.AllVideoActivity;
@@ -52,6 +53,7 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mMusicThread.start();
         mMusicThread.setLinstener(this);
         initView();
+        new VideoEncoder();
 
     }
 

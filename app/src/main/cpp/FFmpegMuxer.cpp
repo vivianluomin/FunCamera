@@ -15,11 +15,13 @@ void FFmpegMuxer::init(){
     int ret,i;
     int videoIndex = 0;
     int audioIndex  = 0;
+    //创建AVFormatContext
     avformat_alloc_output_context2(&mFormateContext,NULL,"mp4",mPath);
     mFormateContext->oformat->video_codec = AV_CODEC_ID_H264;
     mFormateContext->oformat->audio_codec = AV_CODEC_ID_AAC;
     av_dump_format(mFormateContext,0,mPath,1);
     if(!(mFormateContext->flags & AVFMT_NOFILE)){
+        //打开文件，让文件可写
         avio_open(&mFormateContext->pb,mPath,AVIO_FLAG_WRITE);
     }
     mVideoStream = addVideoStream(mFormateContext,mFormateContext->oformat->video_codec);
@@ -33,6 +35,8 @@ void FFmpegMuxer::init(){
     }
     avformat_write_header(mFormateContext,NULL);
 
+    LOGD("FFmpegMuxer %d",mVideoStream->codecpar->video_delay);
+
 
 }
 
@@ -42,7 +46,7 @@ AVStream *FFmpegMuxer::addVideoStream(AVFormatContext *pForContext, AVCodecID co
     AVCodec *codec = NULL;
     AVStream *stream = NULL;
 
-    codec = avcodec_find_decoder(pForContext->oformat->video_codec);
+    codec = avcodec_find_encoder(pForContext->oformat->video_codec);
     if(codec == NULL){
         return NULL;
     }
@@ -73,7 +77,7 @@ AVStream* FFmpegMuxer::addAudioStream(AVFormatContext *pForContext, AVCodecID co
     AVCodec *codec = NULL;
     AVStream *stream = NULL;
 
-    codec = avcodec_find_decoder(pForContext->oformat->video_codec);
+    codec = avcodec_find_encoder(pForContext->oformat->video_codec);
     if(codec == NULL){
         return NULL;
     }
@@ -128,12 +132,13 @@ void FFmpegMuxer::writeToFile(uint8_t *data,BufferInfo *info,AVStream *avStream,
     if(index == mVideroIndex){
         avPacket.pts = av_rescale_q((int64_t)(info->presentationTimeUs/1000 * 1000),
                                      (AVRational){1, AV_TIME_BASE}, mVideoStream->time_base);
+        avPacket.dts = avPacket.pts+av_rescale_q(10,(AVRational){1, AV_TIME_BASE}, mVideoStream->time_base);
     } else{
         avPacket.pts = av_rescale_q((int64_t)(info->presentationTimeUs/1000 * 1000),
                                      (AVRational){1, AV_TIME_BASE}, mAudioStream->time_base);
+        avPacket.dts = avPacket.pts;
     }
 
-    avPacket.dts = avPacket.pts;
     avPacket.duration = 0;
     avPacket.pos = -1;
 
@@ -141,7 +146,7 @@ void FFmpegMuxer::writeToFile(uint8_t *data,BufferInfo *info,AVStream *avStream,
         avPacket.flags |= BufferInfo::BUFFER_FLAG_KEY_FRAME;
     }
 
-    av_interleaved_write_frame(mFormateContext,&avPacket);
+    av_write_frame(mFormateContext,&avPacket);
 
 }
 

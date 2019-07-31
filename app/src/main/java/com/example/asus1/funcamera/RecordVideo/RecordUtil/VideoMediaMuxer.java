@@ -128,8 +128,8 @@ public class VideoMediaMuxer implements ModelController {
     public void writeSampleData(int mediaTrack, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo){
         //写入文件
         if(mStartEncodeCount>0){
-            //mMediaMuxer.writeSampleData(mediaTrack,byteBuffer,bufferInfo);
-            mFFmepgMuxer.write(mediaTrack,byteBuffer,bufferInfo);
+            mMediaMuxer.writeSampleData(mediaTrack,byteBuffer,bufferInfo);
+            //mFFmepgMuxer.write(mediaTrack,byteBuffer,bufferInfo);
         }
 
     }

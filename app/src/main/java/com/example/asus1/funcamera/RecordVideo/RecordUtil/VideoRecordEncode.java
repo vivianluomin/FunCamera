@@ -18,7 +18,7 @@ public class VideoRecordEncode implements Runnable {
     private MediaCodec mViedeoEncode;
     public static final  String MIME_TYPE = "video/avc";
     public static final int FRAME_RATE = 25; //帧率
-    public static final float BPP = 0.25f;
+    public static final float BPP = 0.25f; //位深度
     private Surface mSurface;
 
     private static final String TAG = "VideoRecordEncode";
@@ -90,6 +90,8 @@ public class VideoRecordEncode implements Runnable {
                     break;
                 }
             }
+
+            Log.d(TAG, "prepare: "+dstProfileLevel.profile+"----"+dstProfileLevel.level);
             format.setInteger(MediaFormat.KEY_PROFILE,dstProfileLevel.profile);
             format.setInteger(MediaFormat.KEY_LEVEL,dstProfileLevel.level);
             mViedeoEncode.configure(format,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
@@ -270,14 +272,8 @@ public class VideoRecordEncode implements Runnable {
 
     }
 
-    /**
-     * previous presentationTimeUs for writing
-     */
+
     private long prevOutputPTSUs = 0;
-    /**
-     * get next encoding presentationTimeUs
-     * @return
-     */
     protected long getPTSUs() {
         long result = System.nanoTime() / 1000L;
         // presentationTimeUs should be monotonic
