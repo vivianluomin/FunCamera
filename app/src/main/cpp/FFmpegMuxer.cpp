@@ -35,8 +35,6 @@ void FFmpegMuxer::init(){
     }
     avformat_write_header(mFormateContext,NULL);
 
-    LOGD("FFmpegMuxer %d",mVideoStream->codecpar->video_delay);
-
 
 }
 
@@ -108,16 +106,46 @@ AVStream* FFmpegMuxer::addAudioStream(AVFormatContext *pForContext, AVCodecID co
 void FFmpegMuxer::writeData(int mediaTrack, uint8_t *data, BufferInfo *info) {
 
     if(mediaTrack == 0){
+        LOGD("FFmpegMuxer mediaTrack-----video");
         mVideoStream->codec->extradata = (uint8_t *)av_mallocz(info->size+3);
         memcpy(mVideoStream->codec->extradata,data,info->size);
         mVideoStream->codec->extradata_size = info->size;
         writeToFile(data,info,mVideoStream,mVideroIndex);
     } else if (mediaTrack == 1){
+        LOGD("FFmpegMuxer mediaTrack-----audio");
         mAudioStream->codec->extradata = (uint8_t *)av_mallocz(info->size+3);
         memcpy(mAudioStream->codec->extradata,data,info->size);
         mAudioStream->codec->extradata_size = info->size;
         writeToFile(data,info,mAudioStream,mAudioIndex);
     }
+
+}
+
+
+void FFmpegMuxer::writeData(int mediaTrack, uint8_t *data, long pts,int size,int flag) {
+
+    BufferInfo *info = new BufferInfo();
+
+    if(firstMuxe){
+        startTime = av_gettime();
+        duration = 0;
+        curTime = startTime;
+        firstMuxe = false;
+    } else{
+       int64_t  time = av_gettime();
+       if(time <= curTime){
+           return;
+       }
+       duration = time-curTime;
+       curTime = time;
+    }
+
+    info->duration = 0;
+    info->presentationTimeUs = curTime;
+    info->size = size;
+    info->flags = flag;
+    writeData(mediaTrack,data,info);
+    delete info;
 
 }
 
@@ -139,7 +167,7 @@ void FFmpegMuxer::writeToFile(uint8_t *data,BufferInfo *info,AVStream *avStream,
         avPacket.dts = avPacket.pts;
     }
 
-    avPacket.duration = 0;
+    avPacket.duration = info->duration;
     avPacket.pos = -1;
 
     if(info->flags == BufferInfo::BUFFER_FLAG_KEY_FRAME){
@@ -232,5 +260,26 @@ Java_com_example_asus1_funcamera_RecordVideo_RecordUtil_FFmpegMuxer_native_1stop
     FFmpegMuxer *ffmpegMuxer = reinterpret_cast<FFmpegMuxer *>(handler);
 
     ffmpegMuxer->stop();
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_asus1_funcamera_RecordVideo_RecordUtil_FFmpegMuxer_native_1writeData(JNIEnv *env,
+                                                                                      jobject instance,
+                                                                                      jlong handler,
+                                                                                      jint mediaTrack,
+                                                                                      jobject data,
+                                                                                      jlong pts,
+                                                                                      jint size,
+                                                                                      jint flag
+                                                                                      ){
+
+    FFmpegMuxer *ffmpegMuxer = reinterpret_cast<FFmpegMuxer *>(handler);
+    if(ffmpegMuxer!=NULL){
+        void *by = env->GetDirectBufferAddress(data);
+        ffmpegMuxer->writeData(mediaTrack,(uint8_t *)by,pts,size,flag);
+    }
+
 
 }

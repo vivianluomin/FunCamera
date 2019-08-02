@@ -16,6 +16,8 @@ extern "C"
 #include <libavcodec/avcodec.h>
 //封装格式处理
 #include <libavformat/avformat.h>
+#include <libavutil/avconfig.h>
+#include <libavutil/time.h>
 //像素处理
 #include <libswscale/swscale.h>
 #include <unistd.h>
@@ -41,6 +43,7 @@ public:
     int size;
     int64_t presentationTimeUs;
     int flags;
+    int64_t duration = 0;
     static const int BUFFER_FLAG_END_OF_STREAM = 4;
     static const int BUFFER_FLAG_KEY_FRAME = 1;
 };
@@ -50,6 +53,7 @@ class FFmpegMuxer {
 public:
     FFmpegMuxer(const char *path);
     void writeData(int mediaTrack,uint8_t *data,BufferInfo *info);
+    void writeData(int mediaTrack,uint8_t *data, long pts,int size,int flag);
     void stop();
 
 
@@ -60,6 +64,10 @@ private:
     AVFormatContext *mFormateContext = NULL;
     AVFormatContext *mFormateContext_audio = NULL;
     AVFormatContext *mFormateContext_video = NULL;
+    int64_t duration = 0;
+    int64_t curTime = 0;
+    int64_t startTime = 0;
+    bool firstMuxe = true;
     int mVideroIndex = 0;
     int mAudioIndex = 0;
     void init();

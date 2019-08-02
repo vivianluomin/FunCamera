@@ -18,34 +18,27 @@ public class RenderHandler implements Runnable {
     private Object mSyn = new Object();
     private float[] mStMatrix = new float[16];
     private boolean mRequestRelease = false;
+    private boolean mSetContext = false;
 
     private static final String TAG = "RenderHandler";
 
     public static RenderHandler createRenderHandler(){
         RenderHandler handler = new RenderHandler();
-        new Thread(handler).start();
-        synchronized (handler.mSyn){
-            try {
-                handler.mSyn.wait();
-            }catch (InterruptedException e){
-                return null;
-            }
-        }
-
         return handler;
     }
 
     private void prepare(){
         mEGLHelper = new EGLHelper(mShareContext,mLinkSurface,mTextId);
-        mSyn.notifyAll();
     }
 
     public void setEGLContext(EGLContext context,Surface surface,int textId){
+        Log.d(TAG, "setEGLContext: ");
         mShareContext = context;
         mLinkSurface = surface;
         mTextId = textId;
         Matrix.setIdentityM(mStMatrix,0);
         mRequestEGLContext = true;
+        mSetContext = true;
 
     }
 
@@ -53,6 +46,7 @@ public class RenderHandler implements Runnable {
         if(mRequestRelease) return;
         synchronized (mSyn){
             mTextId = textId;
+            Log.d(TAG, "draw: ");
            // System.arraycopy(stMatrix,0,mStMatrix,0,16);
             mStMatrix = stMatrix;
             mRequestDraw ++;
@@ -71,20 +65,15 @@ public class RenderHandler implements Runnable {
 
     @Override
     public void run() {
-
-        synchronized (mSyn){
-            mRequestRelease= mRequestEGLContext = false;
-            mRequestDraw = 0;
-            mSyn.notifyAll();
-        }
         boolean localRequestDraw = false;
         for(;;){
-            synchronized (mSyn){
-                if(mRequestRelease) break;
-                if(mRequestEGLContext){
-                    mRequestEGLContext = false;
-                    prepare();
-                }
+            if(!mSetContext){
+                continue;
+            }
+            if (mRequestRelease) break;
+            if (mRequestEGLContext) {
+                mRequestEGLContext = false;
+                prepare();
             }
 
             localRequestDraw = mRequestDraw>0 ;
@@ -93,14 +82,18 @@ public class RenderHandler implements Runnable {
                     mRequestDraw --;
                     mEGLHelper.makeCurrent();
                     mEGLHelper.render(mTextId,mStMatrix);
+                    Log.d(TAG, "render: end");
                 }
 
             }else {
                 synchronized (mSyn){
                     try {
-                        mSyn.wait();
+                        if(mRequestDraw<=0){
+                            Log.d(TAG, "wait: ");
+                            mSyn.wait();
+                        }
                     }catch (InterruptedException e){
-                        break;
+                        e.printStackTrace();
                     }
                 }
 

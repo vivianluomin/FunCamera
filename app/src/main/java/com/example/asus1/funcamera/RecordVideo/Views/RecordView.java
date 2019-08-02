@@ -3,12 +3,15 @@ package com.example.asus1.funcamera.RecordVideo.Views;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
+import android.opengl.EGLContext;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.AttributeSet;
 
+import com.example.asus1.funcamera.RecordVideo.Controller.RecordPersenter;
+import com.example.asus1.funcamera.RecordVideo.Encoder.VideoEncoder;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 import com.example.asus1.funcamera.Utils.Constant;
 
@@ -42,6 +45,28 @@ public class RecordView extends GLSurfaceView {
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
+    public int getTextId(){
+        return  mTextId;
+    }
+
+    public void getEGLContext(final RecordActivtiy activtiy, final RecordPersenter persenter){
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mRender){
+                    activtiy.mSharedContext = EGL14.eglGetCurrentContext();
+                    VideoEncoder encoder = persenter.startRecoding(activtiy.mSharedContext,RecordView.this.mTextId);
+                    RecordView.this.setVideoEncoder(encoder);
+                }
+            }
+        });
+    }
+
+    public void setVideoEncoder(VideoEncoder encoder){
+        mRender.mVEncode = encoder;
+    }
+
     public void setType(Class object){
         mType = object;
     }
@@ -66,6 +91,7 @@ public class RecordView extends GLSurfaceView {
         private CameraHelper mCamera;
         private float[] mProjMatrix = new float[16];
         private VideoRecordEncode mEncode;
+        private VideoEncoder mVEncode;
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -109,8 +135,8 @@ public class RecordView extends GLSurfaceView {
             mFlip = !mFlip;
             if(mFlip){
                 synchronized (this){
-                    if(mEncode!=null){
-                        mEncode.onFrameAvaliable(mTextId,mStMatrix);
+                    if(mVEncode!=null){
+                        mVEncode.onFrameAvaliable(mTextId,mStMatrix);
                     }
 
                 }

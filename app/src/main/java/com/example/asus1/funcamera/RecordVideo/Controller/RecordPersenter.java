@@ -1,9 +1,14 @@
 package com.example.asus1.funcamera.RecordVideo.Controller;
 
+import android.opengl.EGLContext;
+
+import com.example.asus1.funcamera.RecordVideo.Encoder.VideoEncoder;
+import com.example.asus1.funcamera.RecordVideo.Encoder.VideoMuxer;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoMediaMuxer;
 import com.example.asus1.funcamera.RecordVideo.RecordUtil.VideoRecordEncode;
 
 import java.io.IOException;
+
 
 public class RecordPersenter {
     private ViewController mViewController;
@@ -25,14 +30,16 @@ public class RecordPersenter {
     public void setModeController(ModelController modeController){
         mModelController = modeController;
     }
-    public void startRecoding(int input){
-        try {
-            VideoMediaMuxer muxer = new VideoMediaMuxer();
-            if(mModelController!=null)
-                mModelController.startRecording(input);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+
+    public void startRecoding(int input) {
+        mModelController.startRecording(input);
+
+    }
+
+    public VideoEncoder startRecoding(EGLContext context, int textId){
+        VideoMuxer muxer = new VideoMuxer(context,textId);
+        mModelController.startRecording(0);
+        return muxer.mVideoEncoder;
     }
 
     public void stopRecoding(){

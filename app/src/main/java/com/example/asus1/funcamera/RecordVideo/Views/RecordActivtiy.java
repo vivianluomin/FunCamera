@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.media.MediaRecorder;
+import android.opengl.EGLContext;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -43,6 +44,8 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
 
     private Dialog mLoadingDoalog;
 
+    public EGLContext mSharedContext;
+
     private Handler mMainHandler = new Handler(this);
 
     @Override
@@ -53,7 +56,6 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
         mMusicThread.start();
         mMusicThread.setLinstener(this);
         initView();
-        new VideoEncoder();
 
     }
 
@@ -176,15 +178,17 @@ public class RecordActivtiy extends BaseActivity implements View.OnClickListener
             input = MediaRecorder.AudioSource.DEFAULT;
         }
         Log.d(TAG, "startRecording: ");
-        mPresenter.startRecoding(input);
+        //mPresenter.startRecoding(input);
+        mRecordView.getEGLContext(this,mPresenter);
         startRecordUI();
-        mVideoPath = mPresenter.getVideoPath();
+        //mVideoPath = mPresenter.getVideoPath();
     }
 
 
     @Override
     public void stopRecording() {
         mPresenter.stopRecoding();
+        mRecordView.setVideoEncoder(null);
     }
 
     @Override

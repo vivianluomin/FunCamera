@@ -6,8 +6,15 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaRecorder;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
+
+import com.example.asus1.funcamera.RecordVideo.RecordUtil.AudioRecordEncode;
 
 import java.io.IOException;
 import java.io.PipedReader;
@@ -26,13 +33,21 @@ public class AudioEncoder implements Runnable {
     LinkedList<AudioFrame> audioFrames = new LinkedList<>();
     private Object mLock = new Object();
     private boolean mEnd = false;
+    private AudioRecoderThread mAudioRecord;
 
     private VideoMuxer mMuxer;
 
-    public AudioEncoder(VideoMuxer muxer){
+    private Handler mAudioHandler;
+    private HandlerThread mHandlerThread;
+    private int audioCount = 0;
+
+    private static final String TAG = "AudioEncoder";
+
+    public AudioEncoder(VideoMuxer muxer) {
         mMuxer = muxer;
         try {
-            mAudioCodec = MediaCodec.createByCodecName(AUDIO_MIME);
+            mAudioHandler = createHandler(true);
+            mAudioCodec = MediaCodec.createEncoderByType(AUDIO_MIME);
             mAudioFormat = MediaFormat.createAudioFormat(AUDIO_MIME,
                     44100, AudioFormat.CHANNEL_IN_STEREO);
             mAudioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE,
@@ -40,67 +55,123 @@ public class AudioEncoder implements Runnable {
             mAudioFormat.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioFormat.CHANNEL_IN_MONO);
             mAudioFormat.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
             mAudioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
-            mAudioCodec.configure(mAudioFormat,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
-            mAudioCodec.setCallback(mCallBack);
+            mAudioCodec.setCallback(mCallBack, mAudioHandler);
+            mAudioCodec.configure(mAudioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            mAudioRecord = new AudioRecoderThread();
 
-        }catch (IOException e){
+        } catch (IOException e) {
 
         }
 
+    }
+
+    private android.os.Handler createHandler(boolean async) {
+        if (async) {
+            try {
+                if (mHandlerThread != null) {
+                    mHandlerThread.quit();
+                }
+                mHandlerThread = new HandlerThread(TAG);
+                mHandlerThread.start();
+                return new android.os.Handler(mHandlerThread.getLooper());
+            } catch (Exception e) {
+
+            }
+        }
+        return new android.os.Handler(Looper.myLooper() != null ? Looper.myLooper() : Looper.getMainLooper());
     }
 
     @Override
     public void run() {
+        mAudioRecord.startRecoding();
         mAudioCodec.start();
     }
 
-    public void startRecoding(){
-
+    public void startRecoding() {
+        isRecoding = true;
+        new Thread(this).start();
     }
 
-    public void stopRecoding(){
+    public void stopRecoding() {
         isRecoding = false;
-        try {
-            mLock.wait();
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }
+        //mLock.notifyAll();
+    }
 
+    private void clear() {
+        Log.d(TAG, "clear: ");
         mAudioCodec.stop();
+        mAudioRecord.stopRecording();
         mAudioCodec.release();
+        mAudioCodec = null;
     }
 
     private MediaCodec.Callback mCallBack = new MediaCodec.Callback() {
         @Override
         public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
+            Log.d(TAG, "onInputBufferAvailable1111: " + audioCount + "--" + index);
+            while (true) {
+                Log.d(TAG, "onInputBufferAvailable: while");
+                if (audioCount > 0) {
+                    synchronized (mLock) {
+                        ByteBuffer byteBuffer = codec.getInputBuffer(index);
+                        byteBuffer.clear();
+                        AudioFrame frame = audioFrames.removeFirst();
+                        --audioCount;
+                        if (frame.size <= 0) {
+                            Log.d(TAG, "onInputBufferAvailable: end of stream");
+                            codec.queueInputBuffer(index, 0, 0, frame.pts, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
 
-            if(audioFrames.size()>0){
-                synchronized (mLock){
-                   ByteBuffer byteBuffer =  codec.getInputBuffer(index);
-                   byteBuffer.clear();
-                   AudioFrame frame = audioFrames.removeFirst();
-                   byteBuffer.put(frame.data);
-                   if(audioFrames.size() <=0){
-                       codec.queueInputBuffer(index,0,frame.size,frame.pts,MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-                       mEnd = true;
-                       mLock.notifyAll();
-                   }else {
-                       codec.queueInputBuffer(index,0,frame.size,frame.pts,0);
-                   }
+                        } else {
+                            byteBuffer.put(frame.data);
+                            codec.queueInputBuffer(index, 0, frame.size, frame.pts, 0);
+                        }
+                    }
 
+                    break;
+
+                } else if(isRecoding){
+                    Log.d(TAG, "onInputBufferAvailable: wait");
+
+                    synchronized (mLock) {
+                        try {
+                            mLock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }else {
+                    break;
                 }
+
             }
+
+            Log.d(TAG, "onInputBufferAvailable: end");
+
         }
 
         @Override
         public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
-            ByteBuffer byteBuffer = codec.getOutputBuffer(index);
-            mMuxer.addData(1,byteBuffer,info.presentationTimeUs);
+            Log.d(TAG, "onOutputBufferAvailable: audio " + info.flags+"---"+info.size);
+            if (info.presentationTimeUs != 0) {
+                ByteBuffer byteBuffer = codec.getOutputBuffer(index);
+                mMuxer.addData(1, byteBuffer, info.presentationTimeUs, info.size, info.flags);
+                codec.releaseOutputBuffer(index, false);
+                Log.d(TAG, "onOutputBufferAvailable: release");
+                if (info.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+                    mEnd = true;
+                    Log.d(TAG, "onOutputBufferAvailable: audio end of stream");
+                    mMuxer.clear();
+                    clear();
+                }
+            } else {
+                codec.releaseOutputBuffer(index, false);
+            }
 
         }
 
         @Override
         public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
+            Log.d(TAG, "onError: " + e.getMessage());
 
         }
 
@@ -110,64 +181,87 @@ public class AudioEncoder implements Runnable {
         }
     };
 
+    public void onAudioAvaliable() {
+        synchronized (mLock) {
+            audioCount++;
+            mLock.notifyAll();
+        }
+    }
 
-    private class AudioRecoderThread extends Thread{
+
+    private class AudioRecoderThread extends Thread {
 
         AudioRecord mAudioRecod;
         int mBufferSize;
         byte[] buffer = new byte[1024];
 
-        AudioRecoderThread(){
-            mBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,CHANNEL_COUNT,ENCODING_FORMAT);
+        AudioRecoderThread() {
+            mBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_COUNT, ENCODING_FORMAT);
             mAudioRecod = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                    SAMPLE_RATE,CHANNEL_COUNT,ENCODING_FORMAT,mBufferSize);
+                    SAMPLE_RATE, CHANNEL_COUNT, ENCODING_FORMAT, mBufferSize);
 
         }
 
-        public void stopRecording(){
+        public void stopRecording() {
             mAudioRecod.stop();
             mAudioRecod.release();
             mAudioRecod = null;
         }
 
+        public void startRecoding() {
+            mAudioRecod.startRecording();
+            this.start();
+        }
+
         @Override
         public void run() {
-            mAudioRecod.startRecording();
-            while (isRecoding){
+            while (isRecoding) {
                 AudioFrame audioFrame = new AudioFrame();
-                audioFrame.data = new byte[1024];
-                int readSize = mAudioRecod.read(audioFrame.data,0,1024);
+                audioFrame.data = ByteBuffer.allocateDirect(1024);
+                int readSize = mAudioRecod.read(audioFrame.data, 1024);
+                if (readSize < 0) {
+                    Log.d(TAG, "run: " + readSize);
+                    continue;
+                }
+                audioFrame.data.position(readSize);
+                audioFrame.data.flip();
                 long pts = getPTS();
-                if(pts!=-1){
+                if (pts != -1) {
                     audioFrame.pts = pts;
                     audioFrame.size = readSize;
-                    audioFrames.add(audioFrame);
+                    Log.d(TAG, "run: add");
+                    synchronized (mLock){
+                        audioFrames.add(audioFrame);
+                    }
+                    onAudioAvaliable();
                 }
 
             }
 
             AudioFrame audioFrame = new AudioFrame();
-            audioFrame.data = new byte[1024];
+            audioFrame.data = null;
             long pts = getPTS();
             audioFrame.pts = pts;
             audioFrame.size = 0;
             audioFrames.add(audioFrame);
+            onAudioAvaliable();
 
         }
     }
 
     private long prePTS = 0;
-    public long getPTS(){
-        long result = System.nanoTime()/1000L;
-        if(result<prePTS){
+
+    public long getPTS() {
+        long result = System.nanoTime() / 1000L;
+        if (result < prePTS) {
             return -1;
         }
         prePTS = result;
         return result;
     }
 
-    private class AudioFrame{
-        byte[] data;
+    private class AudioFrame {
+        ByteBuffer data;
         int size;
         long pts;
     }
