@@ -108,9 +108,7 @@ public class AudioEncoder implements Runnable {
     private MediaCodec.Callback mCallBack = new MediaCodec.Callback() {
         @Override
         public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
-            Log.d(TAG, "onInputBufferAvailable1111: " + audioCount + "--" + index);
             while (true) {
-                Log.d(TAG, "onInputBufferAvailable: while");
                 if (audioCount > 0) {
                     synchronized (mLock) {
                         ByteBuffer byteBuffer = codec.getInputBuffer(index);
@@ -130,8 +128,6 @@ public class AudioEncoder implements Runnable {
                     break;
 
                 } else if(isRecoding){
-                    Log.d(TAG, "onInputBufferAvailable: wait");
-
                     synchronized (mLock) {
                         try {
                             mLock.wait();
@@ -145,18 +141,20 @@ public class AudioEncoder implements Runnable {
 
             }
 
-            Log.d(TAG, "onInputBufferAvailable: end");
 
         }
 
         @Override
         public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
-            Log.d(TAG, "onOutputBufferAvailable: audio " + info.flags+"---"+info.size);
             if (info.presentationTimeUs != 0) {
                 ByteBuffer byteBuffer = codec.getOutputBuffer(index);
-                mMuxer.addData(1, byteBuffer, info.presentationTimeUs, info.size, info.flags);
+                info.presentationTimeUs = getPTS();
+                if(info.presentationTimeUs == -1){
+                    codec.releaseOutputBuffer(index, false);
+                    return;
+                }
+                mMuxer.addData(1, byteBuffer,info.presentationTimeUs,info.size,info.flags);
                 codec.releaseOutputBuffer(index, false);
-                Log.d(TAG, "onOutputBufferAvailable: release");
                 if (info.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
                     mEnd = true;
                     Log.d(TAG, "onOutputBufferAvailable: audio end of stream");

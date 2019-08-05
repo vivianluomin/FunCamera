@@ -142,6 +142,7 @@ public class VideoEncoder implements Runnable{
         public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
             Log.d(TAG, "onOutputBufferAvailable: ");
             ByteBuffer byteBuffer = codec.getOutputBuffer(index);
+            info.presentationTimeUs = getPTS();
             mMuxer.addData(0,byteBuffer,info.presentationTimeUs,info.size,info.flags);
             codec.releaseOutputBuffer(index,false);
             if((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) !=0){
@@ -162,4 +163,15 @@ public class VideoEncoder implements Runnable{
 
         }
     };
+
+    private long prePTS = 0;
+
+    public long getPTS() {
+        long result = System.nanoTime() / 1000L;
+        if (result < prePTS) {
+            return -1;
+        }
+        prePTS = result;
+        return result;
+    }
 }

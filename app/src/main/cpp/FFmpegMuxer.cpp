@@ -35,7 +35,6 @@ void FFmpegMuxer::init(){
     }
     avformat_write_header(mFormateContext,NULL);
 
-
 }
 
 AVStream *FFmpegMuxer::addVideoStream(AVFormatContext *pForContext, AVCodecID codecID) {
@@ -125,23 +124,34 @@ void FFmpegMuxer::writeData(int mediaTrack, uint8_t *data, BufferInfo *info) {
 void FFmpegMuxer::writeData(int mediaTrack, uint8_t *data, long pts,int size,int flag) {
 
     BufferInfo *info = new BufferInfo();
+    int64_t duration = 0;
 
-    if(firstMuxe){
-        startTime = av_gettime();
-        duration = 0;
-        curTime = startTime;
-        firstMuxe = false;
-    } else{
-       int64_t  time = av_gettime();
-       if(time <= curTime){
-           return;
-       }
-       duration = time-curTime;
-       curTime = time;
+
+    if(mediaTrack == 1){
+        if(firstAudioFrame){
+            audioDuration = 0;
+            audioStartTime = av_gettime();
+            firstAudioFrame = false;
+        } else{
+            audioDuration = av_gettime() - audioStartTime;
+        }
+        duration = audioDuration;
     }
 
-    info->duration = 0;
-    info->presentationTimeUs = curTime;
+    if(mediaTrack == 0){
+        if(firstVideoFrame){
+            videoDuration = 0;
+            videoStartTime = av_gettime();
+            firstVideoFrame = false;
+        } else{
+            videoDuration = av_gettime() - videoStartTime;
+        }
+
+        duration = videoDuration;
+    }
+
+
+    info->presentationTimeUs = duration;
     info->size = size;
     info->flags = flag;
     writeData(mediaTrack,data,info);
@@ -157,18 +167,20 @@ void FFmpegMuxer::writeToFile(uint8_t *data,BufferInfo *info,AVStream *avStream,
     avPacket.stream_index = index;
     avPacket.data = data;
     avPacket.size = info->size;
+    LOGD("FFmpegMux  info pts %lld",info->presentationTimeUs/1000 * 1000);
     if(index == mVideroIndex){
+        int64_t  dts = info->presentationTimeUs-200;
         avPacket.pts = av_rescale_q((int64_t)(info->presentationTimeUs/1000 * 1000),
                                      (AVRational){1, AV_TIME_BASE}, mVideoStream->time_base);
-        avPacket.dts = avPacket.pts+av_rescale_q(10,(AVRational){1, AV_TIME_BASE}, mVideoStream->time_base);
+        avPacket.dts = av_rescale_q((int64_t)dts/1000*1000,(AVRational){1, AV_TIME_BASE}, mVideoStream->time_base);
+        LOGD("FFmpegMux  video pts dts %lld,%lld",avPacket.pts,avPacket.dts);
     } else{
         avPacket.pts = av_rescale_q((int64_t)(info->presentationTimeUs/1000 * 1000),
                                      (AVRational){1, AV_TIME_BASE}, mAudioStream->time_base);
         avPacket.dts = avPacket.pts;
+        LOGD("FFmpegMux  audio pts %lld",avPacket.pts);
     }
 
-    avPacket.duration = info->duration;
-    avPacket.pos = -1;
 
     if(info->flags == BufferInfo::BUFFER_FLAG_KEY_FRAME){
         avPacket.flags |= BufferInfo::BUFFER_FLAG_KEY_FRAME;
@@ -241,6 +253,9 @@ Java_com_example_asus1_funcamera_RecordVideo_RecordUtil_FFmpegMuxer_writeData(JN
     jint size = env->GetIntField(info,sizeID);
     jlong presentationTimeUs = env->GetLongField(info,presentationTimeUsID);
     jint  flags = env->GetIntField(info,flagID);
+    jlong test = 12345;
+
+    LOGD("FFmpeg write data pts: %lld,%d,%lld",presentationTimeUs,size,test);
 
     bufferInfo->offset = offset;
     bufferInfo->size = size;

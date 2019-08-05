@@ -7,6 +7,7 @@
 #include <jni.h>
 #include <string>
 #include<android/log.h>
+#include <iostream>
 
 extern "C"
 {
@@ -64,10 +65,12 @@ private:
     AVFormatContext *mFormateContext = NULL;
     AVFormatContext *mFormateContext_audio = NULL;
     AVFormatContext *mFormateContext_video = NULL;
-    int64_t duration = 0;
-    int64_t curTime = 0;
-    int64_t startTime = 0;
-    bool firstMuxe = true;
+    int64_t videoDuration = 0;
+    int64_t videoStartTime = 0;
+    int64_t audioDuration = 0;
+    int64_t audioStartTime = 0;
+    bool firstVideoFrame = true;
+    bool firstAudioFrame = true;
     int mVideroIndex = 0;
     int mAudioIndex = 0;
     void init();

@@ -1,5 +1,6 @@
 package com.example.asus1.funcamera.RecordVideo.Encoder;
 
+import android.media.MediaCodec;
 import android.opengl.EGLContext;
 import android.util.Log;
 
@@ -51,6 +52,10 @@ public class VideoMuxer implements ModelController {
 
     public void addData(int mediaTrack, ByteBuffer byteBuffer, long pts, int size, int flag){
         mMuxer.writeData(mediaTrack,byteBuffer,pts,size,flag);
+    }
+
+    public void addData(int mediaTrack, ByteBuffer byteBuffer, MediaCodec.BufferInfo info){
+        mMuxer.write(mediaTrack,byteBuffer,info);
     }
 
     public void clear(){
